@@ -1,0 +1,125 @@
+### gProfiler plot (`r gp_abbrevs[[{{i}}]]`)
+
+```{r {{c}}-{{i}}-gprofiler-fig}
+e_title <- str_to_sentence(str_trim(str_c(gp_names[[{{i}}]], ' enhancement')))
+s_title <- str_to_sentence(str_trim(str_c(gp_names[[{{i}}]], ' suppression')))
+
+g <- gost(
+  query = list(
+    e = gp_enhs[[{{i}}]]$external_gene_name,
+    s = gp_sups[[{{i}}]]$external_gene_name
+  ),
+  organism = 'mmusculus',
+  ordered_query = T,
+  significant = T,
+  evcodes = T
+)
+
+if (!is.null(g)) {
+  g_tbl <- g$result %>% 
+    filter(term_size < 2000) %>% 
+    select(query, source, term_id, term_name, term_size, intersection, p_value) %>% 
+    pivot_wider(
+      id_cols = c(source, term_id, term_name, term_size), 
+      names_from = query, 
+      values_from = c(intersection, p_value),
+      names_vary = 'slowest'
+    )
+  
+  g$result <- g$result %>% 
+    mutate(
+      query = recode(
+        query, 
+        'e' = e_title, 
+        's' = s_title
+      )
+    )
+  
+  gostplot(g, capped = F, interactive = T)
+} else {
+  cat('No data to show.')
+}
+```
+
+### gProfiler table (`r gp_abbrevs[[{{i}}]]`)
+
+```{r {{c}}-{{i}}-gprofiler-tbl}
+sketch <- htmltools::withTags(table(
+  class = 'display',
+  thead(
+    tr(
+      th(rowspan = 2, 'Source'),
+      th(rowspan = 2, 'Term ID'),
+      th(rowspan = 2, 'Term name'),
+      th(rowspan = 2, 'Term size'),
+      th(colspan = 2, style = 'background-color:#e1e8e3;border-bottom:none;', e_title),
+      th(colspan = 2, style = 'background-color:#e8e1e1;border-bottom:none;', s_title)
+    ),
+    tr(
+      lapply(rep(c('Intersection', 'Pval'), 2), th)
+    )
+  )
+))
+
+render_sort <- "
+function(data, type, row, meta) {
+  if (type === 'sort' && data === null) {
+    return meta.settings.aaSorting[0][1] === 'asc' ? 999 : -999;
+  }
+  return data === null ? data : data.toPrecision(3);
+}
+"
+
+render_tooltip <- "
+function(row, data) {
+
+  // 5th & 7th columns (intersections)
+  for (var i = 4; i < 7; i+=2) {
+    var genes = data[i] ? data[i].split('|')[1].split(',') : [];
+
+    $('td:eq(' + i + ')', row).
+      html('<span class=\"tbl-info\" title=\"' + genes.join('&#010;') + '\">' + genes.length + '</span>');
+  }
+
+}
+"
+
+add_count <- function(x) {
+  str_c(str_pad(str_count(x, ',') + 1, width = 2, side = 'left', pad = '0'), x, sep = '|')
+}
+
+if (!is.null(g)) {
+  g_tbl %>% 
+    mutate(
+      source = factor(source),
+      term_id = if_else(str_detect(term_id, '^GO:'), str_c('<a href="https://www.ebi.ac.uk/QuickGO/term/', term_id, '">', term_id, '</a>'), term_id),
+      intersection_e = add_count(intersection_e),
+      intersection_s = add_count(intersection_s)
+    ) %>% 
+    datatable(
+      rownames = F, 
+      filter = 'top',
+      container = sketch,
+      class = 'compact', 
+      escape = F,
+      options = list(
+        dom = 'tip',
+        rowCallback = JS(render_tooltip),
+        columnDefs = list(
+          list(targets = c(4, 6), className = 'dt-right'),
+          list(targets = c(5, 7), render = JS(render_sort))
+        )
+      )
+    ) %>% 
+    formatRound('term_size', 0) %>% 
+    formatStyle(
+      grep('p_value', names(g_tbl), value = T), 
+      background = styleInterval(
+        quantile(g_tbl[grep('p_value', names(g_tbl), value = T)], probs = seq(.05, .95, .05), na.rm = T),
+        str_c('linear-gradient(90deg, transparent 40%, ', viridis(20), ' 40%, ', viridis(20), ' 55%, transparent 55%)')
+      )
+    )
+} else {
+  cat('No data to show.')
+}
+```

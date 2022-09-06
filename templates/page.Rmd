@@ -1,0 +1,219 @@
+{{c}}
+=======================================================================
+
+
+Row {.tabset .tabset-fade}
+-------------------------------------
+    
+```{r {{c}}-fig, include = F}
+# Generate module tabs
+tabs <- NULL
+
+imgs <- str_c(
+  file.path(enrich_dir, subclass, filedate), 
+  subclass, 
+  c('TREAT-AD', 'TMT-AD', 'Mostafavi_etal', 'Milind_etal', 'Wan_etal'), 
+  'Modules_Up-Down.{{c}}.logfdr.png',
+  sep = '.'
+)
+names(imgs) <- c('Treat-AD', 'Tmt-AD', 'Mostafavi, et al.', 'Milind, et al.', 'Wan, et al.')
+
+for (i in names(imgs)) {
+  tabs <- c(tabs, knit_expand(file = file.path(templates_dir, 'tab.Rmd')))
+}
+```
+
+`r paste(knit(text = tabs), collapse = '\n')`
+
+### Treat-AD correlation
+
+```{r {{c}}-corr}
+knitr::include_graphics(
+  str_c(
+    file.path(biodomain_dir, subclass, filedate), 
+    subclass, 
+    'TREAT-AD',
+    'correlations.{{c}}.png',
+    sep = '.'
+  )
+)
+```
+
+### L2FC correlation
+
+```{r {{c}}-lfc-corr, fig.width = 5}
+drug <- genes_files[['{{c}}']][['C31']]
+geno <- genes_files[['{{c}}']][['PS19']]
+
+both <- merge(drug, geno, by = 'GENE', suffix = c('.C31', '.PS19'))
+both <- both[(p_val.C31 < 0.05 & p_val.PS19 < 0.05)]  # not adjusted p-val
+
+res <- cor.test(both[['avg_log2FC.C31']], both[['avg_log2FC.PS19']])
+
+sub <- sprintf('R = %.3f; p < %.3g', res$estimate[[1]], res$p.value)
+gg_fig <- both %>% 
+  ggplot(aes(x = avg_log2FC.C31, y = avg_log2FC.PS19)) +
+  geom_point(color = NA) +
+  geom_hline(yintercept = 0, linetype = 'dashed', col = 'gray') +
+  geom_vline(xintercept = 0, linetype = 'dashed', col = 'gray') +
+  geom_ribbon(stat = 'smooth', method = 'lm', alpha = 0.5, fill = '#fee0b6') +
+  geom_smooth(method = 'lm', se = F, color = '#053061') + 
+  theme_classic()
+
+both_sig <- both %>% 
+  filter(abs(avg_log2FC.C31) > 0.5 | abs(avg_log2FC.PS19) > 0.55)
+
+ggplotly(gg_fig, tooltip = 'none') %>% 
+  add_markers(
+    x = both$avg_log2FC.C31, 
+    y = both$avg_log2FC.PS19, 
+    color = I('#8073ac'),
+    hovertemplate = paste(
+      '</br><b>', both$GENE, '</b>',
+      '</br> C31 L2FC: ', round(both$avg_log2FC.C31, 3),
+      '</br> PS19 L2FC: ', round(both$avg_log2FC.PS19, 3), 
+      '<extra></extra>'
+    )
+  ) %>% 
+  add_text(
+    x = both_sig$avg_log2FC.C31,
+    y = both_sig$avg_log2FC.PS19,
+    text = both_sig$GENE,
+    textfont = list(size = 10),
+    textposition = 'top middle'
+  ) %>% add_annotations(
+    x = 0,
+    y = 0,
+    xanchor = 'left',
+    xref = 'paper',
+    yref = 'paper',
+    text = sub,
+    showarrow = F,
+    font = list(color = 'gray', size = 15)
+  )
+```
+
+```{r {{c}}-gprofiler, include = F}
+dir_enh <- results[['{{c}}']][category == 'enhancement' & direct == T][order(-(abs(avg_log2FC.PS19) + abs(avg_log2FC.C31)))]
+dir_sup <- results[['{{c}}']][category == 'suppression' & direct == T][order(-(abs(avg_log2FC.PS19) + abs(avg_log2FC.C31)))]
+
+indir_enh <- results[['{{c}}']][category == 'enhancement' & direct == F][order(-(abs(avg_log2FC.PS19) + abs(avg_log2FC.PS19_C31)))]
+indir_sup <- results[['{{c}}']][category == 'suppression' & direct == F][order(-(abs(avg_log2FC.PS19) + abs(avg_log2FC.PS19_C31)))]
+
+enh <- c(dir_enh, indir_enh)
+sup <- c(dir_sup, indir_sup)
+
+comp_enh <- results[['{{c}}']][category == 'compensatory enhancement'][order(-(abs(avg_log2FC.PS19) + abs(avg_log2FC.C31)))]
+comp_sup <- results[['{{c}}']][category == 'compensatory suppression'][order(-(abs(avg_log2FC.PS19) + abs(avg_log2FC.C31)))]
+
+
+# Generate gProfiler tabs
+gprofilers <- NULL
+
+gp_enhs <- list(enh, dir_enh, comp_enh)
+gp_sups <- list(sup, dir_sup, comp_sup)
+gp_names <- c('', 'direct', 'compensatory')
+gp_abbrevs <- c('indir + dir', 'dir', 'comp')
+
+for (i in seq(gp_names)) {
+  gprofilers <- c(gprofilers, knit_expand(file = file.path(templates_dir, 'gprofiler.Rmd')))
+}
+```
+
+`r paste(knit(text = gprofilers), collapse = '\n')`
+
+
+Row {.tabset .tabset-fade data-height=470}
+-------------------------------------
+
+### Genes list
+
+```{r {{c}}-tbl}
+sketch <- htmltools::withTags(table(
+  class = 'display',
+  thead(
+    tr(
+      th(rowspan = 2, 'Ensembl ID'),
+      th(rowspan = 2, 'Symbol'),
+      th(rowspan = 2, 'Category'),
+      th(rowspan = 2, 'Direct'),
+      th(colspan = 4, style = 'background-color:#f3f7eb;border-bottom:none;', names(analyses)[[1]]),
+      th(colspan = 4, style = 'background-color:#fdf2f1;border-bottom:none;', names(analyses)[[2]]),
+      th(colspan = 4, style = 'background-color:#eef8f9;border-bottom:none;', names(analyses)[[3]]),
+      th(colspan = 5, style = 'background-color:#eeeeee;border-bottom:none;', 'Modules')
+    ),
+    tr(
+      lapply(rep(c('Log2FC', 'Pval (adj)', 'Pct 1', 'Pct 2'), 3), th),
+      th('TreatAD'),
+      th('TmtAD'),
+      th('Mostafavi'),
+      th('Milind'),
+      th('Wan')
+    )
+  )
+))
+
+render_tooltip <- "
+function(row, data) {
+
+  // 2nd column (Ensembl gene info)
+  var info = data[1].split('|'),
+      title = 'Chromosome: ' + info[2] + '&#010;Biotype: ' + info[1];
+  
+  $('td:eq(1)', row)
+    .html('<span class=\"tbl-info\" title=\"' + title + '\">' + info[0] + '</span>');
+    
+  // 17th-21st columns (modules)
+  for (var i = 16; i < 21; i++) {
+    var modules = data[i] ? data[i].split('|')[1].split(',') : [];
+
+    $('td:eq(' + i + ')', row).
+      html('<span class=\"tbl-info\" title=\"' + modules.join('&#010;') + '\">' + modules.length + '</span>');
+  }
+
+}
+"
+
+add_count <- function(x) {
+  str_c(str_pad(str_count(x, ',') + 1, width = 2, side = 'left', pad = '0'), x, sep = '|')
+}
+
+results[['{{c}}']] %>% 
+  # filter(!is.na(category)) %>%
+  mutate(
+    ensembl_gene_id = str_c('<a href="https://www.ncbi.nlm.nih.gov/gene/?term=', ensembl_gene_id, '">', ensembl_gene_id, '</a>'),
+    external_gene_name = str_c(external_gene_name, gene_biotype, chromosome_name, sep = '|'),
+    category = factor(category),
+    treatAD = add_count(treatAD),
+    tmtAD = add_count(tmtAD),
+    mostafavi = add_count(mostafavi),
+    milind = add_count(milind),
+    wan = add_count(wan)
+  ) %>% 
+  dplyr::select(-gene_biotype, -chromosome_name) %>% 
+  datatable(
+    rownames = F, 
+    filter = 'top',
+    container = sketch,
+    class = 'compact', 
+    escape = F,
+    options = list(
+      dom = 'tip',
+      rowCallback = JS(render_tooltip),
+      columnDefs = list(
+        list(targets = 16:20, className = 'dt-right')
+      )
+    )
+  ) %>% 
+  formatRound(grep('avg_log2FC', names(results[['{{c}}']]), value = T), 3) %>% 
+  formatSignif(grep('p_val_adj', names(results[['{{c}}']]), value = T), 3) %>% 
+  formatPercentage(grep('pct', names(results[['{{c}}']]), value = T), 1)
+```
+
+### Summary table
+
+```{r {{c}}-summary}
+results[['{{c}}']][order(-category, -direct), .N, by = c('category', 'direct')] %>%
+  kable('html', escape = F) %>% 
+  kable_styling(bootstrap_options = c('hover', 'condensed'), full_width = F)
+```

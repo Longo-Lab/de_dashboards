@@ -1,0 +1,26 @@
+body {
+  font-size: 13px;
+}
+
+td[data-type='factor'] input,
+td[data-type='character'] input {
+  width: 100px !important;
+}
+
+th {
+  white-space: nowrap;
+}
+
+.tbl-info {
+  font-weight: 600;
+}
+
+.tbl-info:hover {
+  color: gray;
+}
+
+[id^=l2fc-correlation] .chart-stage {
+  max-width: 800px;
+  width: 50%;
+  margin: 0 auto;
+}

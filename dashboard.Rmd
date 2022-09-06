@@ -1,0 +1,112 @@
+---
+title: '`r params$subclass` results'
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    css: assets/css/dashboard.css
+
+params:
+  subclass: ''
+  filedate: ''
+  seurat_dir: ''
+  biodomain_dir: ''
+  enrich_dir: ''
+  templates_dir: ''
+  ensembl_genes: ''
+  fdr_cutoff: 0.05
+---
+
+```{r setup, echo = F}
+knitr::opts_chunk$set(echo = F, message = F, warning = F, dpi = 300)
+
+library(knitr)
+library(kableExtra)
+library(DT)
+library(plotly)
+library(gprofiler2)
+library(viridis)
+library(Cairo)
+
+options(bitmapType = 'cairo')
+
+
+subclass <- params$subclass
+filedate <- params$filedate
+seurat_dir <- params$seurat_dir
+biodomain_dir <- params$biodomain_dir
+enrich_dir <- params$enrich_dir
+ensembl_genes <- params$ensembl_genes
+fdr_cutoff <- params$fdr_cutoff
+```
+
+```{r data, include = F}
+analyses <- c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')
+names(analyses) <- c('PS19', 'PS19_C31', 'C31')
+
+# Obtain clusters
+file_regex <- str_c(filedate, '\\.PS19_C31\\.(.+)\\.RNA.+\\.csv\\.gz')
+file_matches <- list.files(file.path(seurat_dir, subclass), pattern = file_regex)
+
+clusters <- unique(str_match(file_matches, file_regex)[,2])
+clusters <- append(clusters[clusters != subclass], subclass, after = 0)  # order subclass before clusters
+names(clusters) <- clusters
+
+# Read in data
+genes_files <- lapply(clusters, function(c) lapply(analyses, function(a) {
+  fread(file.path(seurat_dir, subclass, str_c(filedate, '.PS19_C31.', c, '.RNA.', a, '.csv.gz')))
+}))
+
+# Merge data
+results <- lapply(clusters, function(c) {
+  
+  colnames <- c('GENE', 'avg_log2FC', 'p_val_adj', 'pct.1', 'pct.2')
+  result <- genes_files[[c]][[1]][, ..colnames]
+
+  for (i in head(seq(genes_files[[c]]), -1)) {
+    gene_file <- genes_files[[c]][[i + 1]][, ..colnames]
+    result <- merge(result, gene_file, by = 'GENE', all = T, suffixes = c('', str_c('.', names(analyses)[[i + 1]])))
+  }
+  
+  result <- merge(ensembl_genes, result, by.x = 'external_gene_name', by.y = 'GENE')
+  setnames(result, colnames, str_c(colnames, '.', names(analyses)[[1]]), skip_absent = T)
+  
+  # Add gene category
+  result[, category := fcase(
+  	(avg_log2FC.PS19 > 0 & p_val_adj.PS19 < fdr_cutoff) & ((avg_log2FC.PS19_C31 < 0 & p_val_adj.PS19_C31 < fdr_cutoff) | (avg_log2FC.C31 < 0 & p_val_adj.C31 < fdr_cutoff)), 'suppression',
+  	(avg_log2FC.PS19 > 0 & p_val_adj.PS19 < fdr_cutoff) & (avg_log2FC.C31 > 0 & p_val_adj.C31 < fdr_cutoff), 'compensatory enhancement',
+  	(avg_log2FC.PS19 < 0 & p_val_adj.PS19 < fdr_cutoff) & ((avg_log2FC.PS19_C31 > 0 & p_val_adj.PS19_C31 < fdr_cutoff) | (avg_log2FC.C31 > 0 & p_val_adj.C31 < fdr_cutoff)), 'enhancement',
+  	(avg_log2FC.PS19 < 0 & p_val_adj.PS19 < fdr_cutoff) & (avg_log2FC.C31 < 0 & p_val_adj.C31 < fdr_cutoff), 'compensatory suppression',
+  	default = NA_character_
+  )]
+  
+  # Add gene direction
+  result[, direct := fcase(
+    category == 'suppression' & (avg_log2FC.C31 < 0 & p_val_adj.C31 < fdr_cutoff), T,
+    category == 'enhancement' & (avg_log2FC.C31 > 0 & p_val_adj.C31 < fdr_cutoff), T,
+    category %in% c('suppression', 'enhancement'), F,
+    default = NA
+  )]
+  
+  # Rearrange columns
+  var_names <- c('ensembl_gene_id', 'external_gene_name', 'gene_biotype', 'chromosome_name', 'category', 'direct')
+  setcolorder(
+    result, 
+    c(
+      var_names,
+      setdiff(names(result), c(var_names, names(modules))),
+      names(modules)
+    )
+  )
+})
+```
+
+```{r pages, include = F}
+# Generate cell type/subclass pages
+pages <- NULL
+
+for (c in names(results)) {
+  pages <- c(pages, knit_expand(file = file.path(templates_dir, 'page.Rmd')))
+}
+```
+
+`r paste(knit(text = pages), collapse = '\n')`

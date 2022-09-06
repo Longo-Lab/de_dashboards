@@ -1,0 +1,6 @@
+### {{i}}
+
+```{r}
+knitr::include_graphics(imgs[['{{i}}']])
+```
+
