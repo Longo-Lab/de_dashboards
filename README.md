@@ -36,14 +36,14 @@ PATH=$PATH:$HOME/.npm/node_modules/.bin
 export PATH
 ```
 
-Encrypt all HTML files in the output directory, making sure to purge modules if there are conflicts with R:
+Encrypt all HTML files in the output directory, making sure to purge modules if there are conflicts:
 
 ```
 $ module purge
 $ find ./outputs/ps19_c31/ -type f -name "*.html" -exec staticrypt {} PASSPHRASE -o {} -r 1 \;
 ```
 
-Alternatively, run `gen_dashboards.sh` and provide the name (`-u`) and password (`-p`) arguments:
+Alternatively, run `gen_dashboards.sh` and provide the name (`-n`) and password (`-p`) arguments:
 
 ```
 $ sbatch gen_dashboards.sh -n ps19_c31 -p PASSPHRASE
