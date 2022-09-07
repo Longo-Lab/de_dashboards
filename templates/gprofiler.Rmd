@@ -1,6 +1,6 @@
 ### gProfiler plot (`r gp_abbrevs[[{{i}}]]`)
 
-```{r {{c}}-{{i}}-gprofiler-fig}
+```{r {{r}}-{{i}}-gprofiler-fig}
 e_title <- str_to_sentence(str_trim(str_c(gp_names[[{{i}}]], ' enhancement')))
 s_title <- str_to_sentence(str_trim(str_c(gp_names[[{{i}}]], ' suppression')))
 
@@ -43,7 +43,7 @@ if (!is.null(g)) {
 
 ### gProfiler table (`r gp_abbrevs[[{{i}}]]`)
 
-```{r {{c}}-{{i}}-gprofiler-tbl}
+```{r {{r}}-{{i}}-gprofiler-tbl}
 sketch <- htmltools::withTags(table(
   class = 'display',
   thead(

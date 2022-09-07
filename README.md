@@ -43,7 +43,12 @@ $ module purge
 $ find ./outputs/ps19_c31/ -type f -name "*.html" -exec staticrypt {} PASSPHRASE -o {} -r 1 \;
 ```
 
+Alternatively, run `gen_dashboards.sh` and provide the name (`-u`) and password (`-p`) arguments:
+
+```
+$ sbatch gen_dashboards.sh -n ps19_c31 -p PASSPHRASE
+```
+
 ## Use
 
 This repository is for internal use of the Longo Lab only. All work herein is under the exclusive copyright of the Longo Lab. Open source versions of the code may be made available in dedicated repositories associated with individual publications and projects at the discretion of the Longo Lab.
-

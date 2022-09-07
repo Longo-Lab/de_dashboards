@@ -9,10 +9,12 @@ params:
   subclass: ''
   filedate: ''
   seurat_dir: ''
-  biodomain_dir: ''
-  enrich_dir: ''
   templates_dir: ''
   ensembl_genes: ''
+  nameset: ''
+  geno: ''
+  drug: ''
+  analyses: !r c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')
   fdr_cutoff: 0.05
 ---
 
@@ -33,18 +35,19 @@ options(bitmapType = 'cairo')
 subclass <- params$subclass
 filedate <- params$filedate
 seurat_dir <- params$seurat_dir
-biodomain_dir <- params$biodomain_dir
-enrich_dir <- params$enrich_dir
 ensembl_genes <- params$ensembl_genes
+nameset <- params$nameset
+geno <- params$geno
+drug <- params$drug
+analyses <- params$analyses
 fdr_cutoff <- params$fdr_cutoff
 ```
 
 ```{r data, include = F}
-analyses <- c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')
-names(analyses) <- c('PS19', 'PS19_C31', 'C31')
+names(analyses) <- c('geno', 'geno_drug', 'drug')
 
 # Obtain clusters
-file_regex <- str_c(filedate, '\\.PS19_C31\\.(.+)\\.RNA.+\\.csv\\.gz')
+file_regex <- str_c(filedate, '\\.', nameset, '\\.(.+)\\.RNA.+\\.csv\\.gz')
 file_matches <- list.files(file.path(seurat_dir, subclass), pattern = file_regex)
 
 clusters <- unique(str_match(file_matches, file_regex)[,2])
@@ -53,7 +56,7 @@ names(clusters) <- clusters
 
 # Read in data
 genes_files <- lapply(clusters, function(c) lapply(analyses, function(a) {
-  fread(file.path(seurat_dir, subclass, str_c(filedate, '.PS19_C31.', c, '.RNA.', a, '.csv.gz')))
+  fread(file.path(seurat_dir, subclass, str_c(filedate, nameset, c, 'RNA', a, 'csv.gz', sep = '.')))
 }))
 
 # Merge data
@@ -72,17 +75,17 @@ results <- lapply(clusters, function(c) {
   
   # Add gene category
   result[, category := fcase(
-  	(avg_log2FC.PS19 > 0 & p_val_adj.PS19 < fdr_cutoff) & ((avg_log2FC.PS19_C31 < 0 & p_val_adj.PS19_C31 < fdr_cutoff) | (avg_log2FC.C31 < 0 & p_val_adj.C31 < fdr_cutoff)), 'suppression',
-  	(avg_log2FC.PS19 > 0 & p_val_adj.PS19 < fdr_cutoff) & (avg_log2FC.C31 > 0 & p_val_adj.C31 < fdr_cutoff), 'compensatory enhancement',
-  	(avg_log2FC.PS19 < 0 & p_val_adj.PS19 < fdr_cutoff) & ((avg_log2FC.PS19_C31 > 0 & p_val_adj.PS19_C31 < fdr_cutoff) | (avg_log2FC.C31 > 0 & p_val_adj.C31 < fdr_cutoff)), 'enhancement',
-  	(avg_log2FC.PS19 < 0 & p_val_adj.PS19 < fdr_cutoff) & (avg_log2FC.C31 < 0 & p_val_adj.C31 < fdr_cutoff), 'compensatory suppression',
+  	(avg_log2FC.geno > 0 & p_val_adj.geno < fdr_cutoff) & ((avg_log2FC.geno_drug < 0 & p_val_adj.geno_drug < fdr_cutoff) | (avg_log2FC.drug < 0 & p_val_adj.drug < fdr_cutoff)), 'suppression',
+  	(avg_log2FC.geno > 0 & p_val_adj.geno < fdr_cutoff) & (avg_log2FC.drug > 0 & p_val_adj.drug < fdr_cutoff), 'compensatory enhancement',
+  	(avg_log2FC.geno < 0 & p_val_adj.geno < fdr_cutoff) & ((avg_log2FC.geno_drug > 0 & p_val_adj.geno_drug < fdr_cutoff) | (avg_log2FC.drug > 0 & p_val_adj.drug < fdr_cutoff)), 'enhancement',
+  	(avg_log2FC.geno < 0 & p_val_adj.geno < fdr_cutoff) & (avg_log2FC.drug < 0 & p_val_adj.drug < fdr_cutoff), 'compensatory suppression',
   	default = NA_character_
   )]
   
   # Add gene direction
   result[, direct := fcase(
-    category == 'suppression' & (avg_log2FC.C31 < 0 & p_val_adj.C31 < fdr_cutoff), T,
-    category == 'enhancement' & (avg_log2FC.C31 > 0 & p_val_adj.C31 < fdr_cutoff), T,
+    category == 'suppression' & (avg_log2FC.drug < 0 & p_val_adj.drug < fdr_cutoff), T,
+    category == 'enhancement' & (avg_log2FC.drug > 0 & p_val_adj.drug < fdr_cutoff), T,
     category %in% c('suppression', 'enhancement'), F,
     default = NA
   )]
@@ -104,7 +107,7 @@ results <- lapply(clusters, function(c) {
 # Generate cell type/subclass pages
 pages <- NULL
 
-for (c in names(results)) {
+for (r in names(results)) {
   pages <- c(pages, knit_expand(file = file.path(templates_dir, 'page.Rmd')))
 }
 ```
