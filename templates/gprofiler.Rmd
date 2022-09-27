@@ -4,38 +4,42 @@
 e_title <- str_to_sentence(str_trim(str_c(gp_names[[{{i}}]], ' enhancement')))
 s_title <- str_to_sentence(str_trim(str_c(gp_names[[{{i}}]], ' suppression')))
 
-g <- gost(
-  query = list(
-    e = gp_enhs[[{{i}}]]$external_gene_name,
-    s = gp_sups[[{{i}}]]$external_gene_name
-  ),
-  organism = 'mmusculus',
-  ordered_query = T,
-  significant = T,
-  evcodes = T
-)
-
-if (!is.null(g)) {
-  g_tbl <- g$result %>% 
-    filter(term_size < 2000) %>% 
-    select(query, source, term_id, term_name, term_size, intersection, p_value) %>% 
-    pivot_wider(
-      id_cols = c(source, term_id, term_name, term_size), 
-      names_from = query, 
-      values_from = c(intersection, p_value),
-      names_vary = 'slowest'
-    )
+if (!is_empty(gp_enhs[[{{i}}]]$external_gene_name) && !is_empty(gp_sups[[{{i}}]]$external_gene_name)) {
+  g <- gost(
+    query = list(
+      e = gp_enhs[[{{i}}]]$external_gene_name,
+      s = gp_sups[[{{i}}]]$external_gene_name
+    ),
+    organism = 'mmusculus',
+    ordered_query = T,
+    significant = T,
+    evcodes = T
+  )
   
-  g$result <- g$result %>% 
-    mutate(
-      query = recode(
-        query, 
-        'e' = e_title, 
-        's' = s_title
+  if (!is.null(g)) {
+    g_tbl <- g$result %>%
+      filter(term_size < 2000) %>%
+      select(query, source, term_id, term_name, term_size, intersection, p_value) %>%
+      pivot_wider(
+        id_cols = c(source, term_id, term_name, term_size),
+        names_from = query,
+        values_from = c(intersection, p_value),
+        names_vary = 'slowest'
       )
-    )
   
-  gostplot(g, capped = F, interactive = T)
+    g$result <- g$result %>%
+      mutate(
+        query = recode(
+          query,
+          'e' = e_title,
+          's' = s_title
+        )
+      )
+  
+    gostplot(g, capped = F, interactive = T)
+  } else {
+    cat('No data to show.')
+  }
 } else {
   cat('No data to show.')
 }
@@ -88,7 +92,7 @@ add_count <- function(x) {
   str_c(str_pad(str_count(x, ',') + 1, width = 2, side = 'left', pad = '0'), x, sep = '|')
 }
 
-if (!is.null(g)) {
+if (exists('g') && !is.null(g)) {
   g_tbl %>% 
     mutate(
       source = factor(source),
@@ -122,4 +126,6 @@ if (!is.null(g)) {
 } else {
   cat('No data to show.')
 }
+
+if (exists('g')) rm(g)
 ```

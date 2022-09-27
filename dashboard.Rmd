@@ -1,21 +1,27 @@
 ---
-title: '`r params$subclass` results'
+title: '`r ifelse(params$typeout == '', params$nameset, params$typeout)` results'
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
     css: assets/css/dashboard.css
 
 params:
-  subclass: ''
-  filedate: ''
-  seurat_dir: ''
-  templates_dir: ''
+  base_dir: ''
+  templates_dir: 'templates'
   ensembl_genes: ''
   nameset: ''
   geno: ''
   drug: ''
+  filedate: ''
+  typeout: ''
   analyses: !r c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')
+  de_cols: !r c('GENE', 'avg_log2FC', 'p_val_adj', 'pct.1', 'pct.2')
+  de_names: !r c('Log2FC', 'Pval (adj)', 'Pct 1', 'Pct 2')
+  pval_col: 'p_val'
+  lfc_unshrunken_col: 'avg_log2FC'
   fdr_cutoff: 0.05
+  lfc_cutoff_geno: 0.55 
+  lfc_cutoff_drug: 0.5
 ---
 
 ```{r setup, echo = F}
@@ -32,60 +38,92 @@ library(Cairo)
 options(bitmapType = 'cairo')
 
 
-subclass <- params$subclass
-filedate <- params$filedate
-seurat_dir <- params$seurat_dir
+base_dir <- params$base_dir
+templates_dir <- params$templates_dir
 ensembl_genes <- params$ensembl_genes
 nameset <- params$nameset
 geno <- params$geno
 drug <- params$drug
+filedate <- params$filedate
+typeout <- params$typeout
 analyses <- params$analyses
+de_cols <- params$de_cols
+de_names <- params$de_names
+pval_col <- params$pval_col
+lfc_unshrunken_col <- params$lfc_unshrunken_col
 fdr_cutoff <- params$fdr_cutoff
+lfc_cutoff_geno <- params$lfc_cutoff_geno
+lfc_cutoff_drug <- params$lfc_cutoff_drug
+
+is_sc <- typeout != ''
+if (!is_sc) typeout = nameset
+
+gene_col <- de_cols[[1]]
+lfc_col <- de_cols[[2]]
+p_col <- de_cols[[3]]
+
+ensembl_var <- ifelse(is_sc, 'external_gene_name', 'ensembl_gene_id')
 ```
 
 ```{r data, include = F}
+modules <- c('TREAT-AD.Mouse.Genes.txt', 'TMT-LP.Mouse.Genes.txt', 'Mostafavi_etal.Mouse.Genes.txt', 'Milind_etal.Mouse.Genes.txt', 'AD_modules_full.tsv')
+names(modules) <- c('treatAD', 'tmtAD', 'mostafavi', 'milind', 'wan')
+
 names(analyses) <- c('geno', 'geno_drug', 'drug')
 
-# Obtain clusters
-file_regex <- str_c(filedate, '\\.', nameset, '\\.(.+)\\.RNA.+\\.csv\\.gz')
-file_matches <- list.files(file.path(seurat_dir, subclass), pattern = file_regex)
+lfc_geno <- str_c(lfc_col, 'geno', sep = '.')
+lfc_drug <- str_c(lfc_col, 'drug', sep = '.')
+lfc_geno_drug <- str_c(lfc_col, 'geno_drug', sep = '.')
+p_geno <- str_c(p_col, 'geno', sep = '.')
+p_drug <- str_c(p_col, 'drug', sep = '.')
+p_geno_drug <- str_c(p_col, 'geno_drug', sep = '.')
 
-clusters <- unique(str_match(file_matches, file_regex)[,2])
-clusters <- append(clusters[clusters != subclass], subclass, after = 0)  # order subclass before clusters
+
+# Obtain clusters
+if (is_sc) {
+  file_regex <- str_c(filedate, '\\.', nameset, '\\.(.+)\\.RNA.+\\.csv\\.gz')
+  file_matches <- list.files(file.path(base_dir, typeout), pattern = file_regex)
+  clusters <- unique(str_match(file_matches, file_regex)[,2])
+  clusters <- append(clusters[clusters != typeout], typeout, after = 0)  # order subclass before clusters
+} else {
+  clusters <- nameset
+}
+
 names(clusters) <- clusters
 
 # Read in data
 genes_files <- lapply(clusters, function(c) lapply(analyses, function(a) {
-  fread(file.path(seurat_dir, subclass, str_c(filedate, nameset, c, 'RNA', a, 'csv.gz', sep = '.')))
+  fn <- ifelse(is_sc, str_c(nameset, '.', c), nameset)
+  
+  fread(file.path(base_dir, typeout, str_c(filedate, fn, 'RNA', a, 'csv.gz', sep = '.')))
 }))
 
 # Merge data
 results <- lapply(clusters, function(c) {
   
-  colnames <- c('GENE', 'avg_log2FC', 'p_val_adj', 'pct.1', 'pct.2')
-  result <- genes_files[[c]][[1]][, ..colnames]
+  result <- genes_files[[c]][[1]][!(is.na(get(gene_col))), ..de_cols]
 
   for (i in head(seq(genes_files[[c]]), -1)) {
-    gene_file <- genes_files[[c]][[i + 1]][, ..colnames]
-    result <- merge(result, gene_file, by = 'GENE', all = T, suffixes = c('', str_c('.', names(analyses)[[i + 1]])))
+    gene_file <- genes_files[[c]][[i + 1]][, ..de_cols]
+    result <- merge(result, gene_file, by = gene_col, all = T, suffixes = c('', str_c('.', names(analyses)[[i + 1]])))
   }
   
-  result <- merge(ensembl_genes, result, by.x = 'external_gene_name', by.y = 'GENE')
-  setnames(result, colnames, str_c(colnames, '.', names(analyses)[[1]]), skip_absent = T)
+  result <- merge(ensembl_genes, result, by.x = ensembl_var, by.y = gene_col)
+  setnames(result, de_cols, str_c(de_cols, '.', names(analyses)[[1]]), skip_absent = T)
   
   # Add gene category
   result[, category := fcase(
-  	(avg_log2FC.geno > 0 & p_val_adj.geno < fdr_cutoff) & ((avg_log2FC.geno_drug < 0 & p_val_adj.geno_drug < fdr_cutoff) | (avg_log2FC.drug < 0 & p_val_adj.drug < fdr_cutoff)), 'suppression',
-  	(avg_log2FC.geno > 0 & p_val_adj.geno < fdr_cutoff) & (avg_log2FC.drug > 0 & p_val_adj.drug < fdr_cutoff), 'compensatory enhancement',
-  	(avg_log2FC.geno < 0 & p_val_adj.geno < fdr_cutoff) & ((avg_log2FC.geno_drug > 0 & p_val_adj.geno_drug < fdr_cutoff) | (avg_log2FC.drug > 0 & p_val_adj.drug < fdr_cutoff)), 'enhancement',
-  	(avg_log2FC.geno < 0 & p_val_adj.geno < fdr_cutoff) & (avg_log2FC.drug < 0 & p_val_adj.drug < fdr_cutoff), 'compensatory suppression',
+  	(get(lfc_geno) > 0 & get(p_geno) < fdr_cutoff) & ((get(lfc_geno_drug) < 0 & get(p_geno_drug) < fdr_cutoff) | (get(lfc_drug) < 0 & get(p_drug) < fdr_cutoff)), 'suppression',
+  	(get(lfc_geno) > 0 & get(p_geno) < fdr_cutoff) & (get(lfc_drug) > 0 & get(p_drug) < fdr_cutoff), 'compensatory enhancement',
+  	(get(lfc_geno) < 0 & get(p_geno) < fdr_cutoff) & ((get(lfc_geno_drug) > 0 & get(p_geno_drug) < fdr_cutoff) | (get(lfc_drug) > 0 & get(p_drug) < fdr_cutoff)), 'enhancement',
+  	(get(lfc_geno) < 0 & get(p_geno) < fdr_cutoff) & (get(lfc_drug) < 0 & get(p_drug) < fdr_cutoff), 'compensatory suppression',
   	default = NA_character_
   )]
   
   # Add gene direction
   result[, direct := fcase(
-    category == 'suppression' & (avg_log2FC.drug < 0 & p_val_adj.drug < fdr_cutoff), T,
-    category == 'enhancement' & (avg_log2FC.drug > 0 & p_val_adj.drug < fdr_cutoff), T,
+    category == 'suppression' & (get(lfc_drug) < 0 & get(p_drug) < fdr_cutoff), T,
+    category == 'enhancement' & (get(lfc_drug) > 0 & get(p_drug) < fdr_cutoff), T,
     category %in% c('suppression', 'enhancement'), F,
     default = NA
   )]

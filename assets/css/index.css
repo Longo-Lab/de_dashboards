@@ -53,5 +53,5 @@ a:hover {
 }
 
 .content > h2:not(:first-of-type) {
-  margin-block-start: 2em;
+  margin-block-start: 2.5em;
 }
