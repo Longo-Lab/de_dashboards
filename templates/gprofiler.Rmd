@@ -92,19 +92,26 @@ add_count <- function(x) {
   str_c(str_pad(str_count(x, ',') + 1, width = 2, side = 'left', pad = '0'), x, sep = '|')
 }
 
-if (exists('g') && !is.null(g)) {
-  g_tbl %>% 
+if (exists('g') && !is.null(g) && nrow(g_tbl) > 0) {
+  for (query in c('e', 's')) {
+    for (colname in c('intersection', 'p_value')) {
+      field <- str_c(colname, query, sep = '_')
+      if (!field %in% names(g_tbl)) g_tbl[[field]] <- NA
+    }
+  }
+  
+  g_tbl %>%
     mutate(
       source = factor(source),
       term_id = if_else(str_detect(term_id, '^GO:'), str_c('<a href="https://www.ebi.ac.uk/QuickGO/term/', term_id, '">', term_id, '</a>'), term_id),
       intersection_e = add_count(intersection_e),
       intersection_s = add_count(intersection_s)
-    ) %>% 
+    ) %>%
     datatable(
-      rownames = F, 
+      rownames = F,
       filter = 'top',
       container = sketch,
-      class = 'compact', 
+      class = 'compact',
       escape = F,
       options = list(
         dom = 'tip',
@@ -114,10 +121,10 @@ if (exists('g') && !is.null(g)) {
           list(targets = c(5, 7), render = JS(render_sort))
         )
       )
-    ) %>% 
-    formatRound('term_size', 0) %>% 
+    ) %>%
+    formatRound('term_size', 0) %>%
     formatStyle(
-      grep('p_value', names(g_tbl), value = T), 
+      grep('p_value', names(g_tbl), value = T),
       background = styleInterval(
         quantile(g_tbl[grep('p_value', names(g_tbl), value = T)], probs = seq(.05, .95, .05), na.rm = T),
         str_c('linear-gradient(90deg, transparent 40%, ', viridis(20), ' 40%, ', viridis(20), ' 55%, transparent 55%)')

@@ -217,8 +217,8 @@ t <- results[['{{r}}']] %>%
       )
     )
   ) %>% 
-  formatRound(grep(lfc_col, names(results[['{{r}}']]), value = T), 3) %>% 
-  formatSignif(grep(str_c(p_col, '|', pval_col), names(results[['{{r}}']]), value = T), 3)
+  formatRound(grep(str_c(lfc_col, '|log2'), names(results[['{{r}}']]), value = T), 3) %>% 
+  formatSignif(grep(str_c(p_col, '|', pval_col, '|adj|val'), names(results[['{{r}}']]), value = T), 3)
 
 if (any(str_detect(names(results[['{{r}}']]), 'pct'))) {
   t %>% 

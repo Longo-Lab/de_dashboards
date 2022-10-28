@@ -26,11 +26,11 @@ rmarkdown::render(
     geno = 'APPL/S',
     drug = 'BD10-2',
     filedate = '20220914',
-    de_cols = c('GENE', 'shrunkenL2FC', 'svalue', 'log2FoldChange', 'padj', 'pvalue'),
-    de_names = c('Log2FC (shrunk)', 'Sval', 'Log2FC', 'Pval (adj)', 'Pval'),
+    de_cols = c('GENE', 'shrunkenL2FC', 'pvalue', 'svalue', 'log2FoldChange', 'padj'),
+    de_names = c('Log2FC (shrunk)', 'Pval', 'Sval', 'Log2FC', 'Pval (adj)'),
     pval_col = 'pvalue',
     lfc_unshrunken_col = 'log2FoldChange',
-    fdr_cutoff = 0.5,
+    fdr_cutoff = 0.05,
     lfc_cutoff_geno = 1,
     lfc_cutoff_drug = 1.5
   )
