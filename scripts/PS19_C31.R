@@ -16,21 +16,21 @@ ensembl_genes <- get_genes_info(ensembl_ver = '105')
 
 
 # Generate results
-typeouts <- c('MG', 'ASC')
-filedates <- c('20220711', '20220721')
+# typeouts <- c('MG', 'ASC', 'OLG', 'L4_IT_CTX')
+typeouts <- c('L4_IT_CTX')
 
-for (i in seq(typeouts)) {
+for (i in typeouts) {
   rmarkdown::render(
     input = 'dashboard.Rmd',
-    output_file = file.path(output_dir, str_c(typeouts[[i]], '.html')),
+    output_file = file.path(output_dir, str_c(i, '.html')),
     params = list(
       base_dir = seurat_dir,
       ensembl_genes = ensembl_genes,
       nameset = nameset,
       geno = 'PS19',
       drug = 'C31',
-      filedate = filedates[[i]],
-      typeout = typeouts[[i]]
+      filedate = '20220710',
+      typeout = i
     )
   )
 }

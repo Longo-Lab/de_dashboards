@@ -42,7 +42,7 @@ Load R and run script to generate dashboards:
 
 ```
 $ ml R/4.0
-$ Rscript scripts/ps19_c31.R
+$ Rscript scripts/PS19_C31.R
 ```
 
 Ensure [`tidyr`](https://tidyr.tidyverse.org/news/index.html#tidyr-120) is updated to at least v.1.2.0 to use the `names_vary` argument for `pivot_wider()`:
@@ -76,13 +76,13 @@ Encrypt all HTML files in the output directory, making sure to purge modules if 
 
 ```
 $ module purge
-$ find outputs/ps19_c31/ -type f -name "*.html" -exec staticrypt {} PASSPHRASE -o {} -r 1 \;
+$ find outputs/PS19_C31/ -type f -name "*.html" -exec staticrypt {} PASSPHRASE -o {} -r 1 \;
 ```
 
 Alternatively, run `gen_dashboards.sh` and provide the name (`-n`) and password (`-p`) arguments:
 
 ```
-$ sbatch gen_dashboards.sh -n ps19_c31 -p PASSPHRASE
+$ sbatch gen_dashboards.sh -n PS19_C31 -p PASSPHRASE
 ```
 
 ## Use

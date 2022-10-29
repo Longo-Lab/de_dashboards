@@ -73,7 +73,7 @@ gg_fig <- both %>%
 
 both_sig <- both[(abs(get(lfc_unshrunken_drug)) > lfc_cutoff_drug | abs(get(lfc_unshrunken_geno)) > lfc_cutoff_geno)]
 
-ggplotly(gg_fig, tooltip = 'none') %>%
+gg_fig <- ggplotly(gg_fig, tooltip = 'none') %>%
   add_markers(
     x = both[[lfc_unshrunken_drug]],
     y = both[[lfc_unshrunken_geno]],
@@ -84,23 +84,29 @@ ggplotly(gg_fig, tooltip = 'none') %>%
       '<br>', geno, ' L2FC: ', round(both[[lfc_unshrunken_geno]], 3), ' (p=', signif(both[[pval_geno]], 3), ')',
       '<extra></extra>'
     )
-  ) %>%
-  add_text(
-    x = both_sig[[lfc_unshrunken_drug]],
-    y = both_sig[[lfc_unshrunken_geno]],
-    text = both_sig$external_gene_name,
-    textfont = list(size = 10),
-    textposition = 'top middle'
-  ) %>% add_annotations(
-    x = 0,
-    y = 0,
-    xanchor = 'left',
-    xref = 'paper',
-    yref = 'paper',
-    text = sub,
-    showarrow = F,
-    font = list(color = 'gray', size = 15)
   )
+
+if (nrow(both_sig) > 0) {
+  gg_fig <- gg_fig %>%
+    add_text(
+      x = both_sig[[lfc_unshrunken_drug]],
+      y = both_sig[[lfc_unshrunken_geno]],
+      text = both_sig$external_gene_name,
+      textfont = list(size = 10),
+      textposition = 'top middle'
+    ) %>% add_annotations(
+      x = 0,
+      y = 0,
+      xanchor = 'left',
+      xref = 'paper',
+      yref = 'paper',
+      text = sub,
+      showarrow = F,
+      font = list(color = 'gray', size = 15)
+    )
+}
+
+gg_fig
 ```
 
 ```{r {{r}}-gprofiler, include = F}
