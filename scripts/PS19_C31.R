@@ -16,8 +16,8 @@ ensembl_genes <- get_genes_info(ensembl_ver = '105')
 
 
 # Generate results
-# typeouts <- c('MG', 'ASC', 'OLG', 'L4_IT_CTX')
-typeouts <- c('L4_IT_CTX')
+typeouts <- c('MG', 'ASC', 'OLG', 'OPC', 'L4_IT_CTX')
+# typeouts <- c('L4_IT_CTX')
 
 for (i in typeouts) {
   rmarkdown::render(

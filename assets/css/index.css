@@ -59,7 +59,7 @@ a:hover {
 .box {
   width: 600px;
   height: 30%;
-  border: 5px dashed #f7a239;
+  text-align: center;
 }
 
 img {
