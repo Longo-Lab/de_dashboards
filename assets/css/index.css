@@ -8,11 +8,11 @@ body {
 
 h1 {
   width: 600px;
-  margin: 50px auto 0;
-  padding: 20px;
+  margin: 0px auto 0;
+  padding: 0px;
   text-align: center;
   font-weight: 400;
-  background-color: #B1040E;
+  background-color: #820000;
   color: #fff;
   border: 1px solid #820000;
 }
