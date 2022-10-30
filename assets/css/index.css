@@ -8,8 +8,8 @@ body {
 
 h1 {
   width: 660px;
-/*  margin: 0px auto 0; */
-/*  padding: 0px; */
+  margin: 0px auto 0; 
+  padding: 0px; 
   text-align: center;
   font-weight: 400;
   background-color: #820000;
