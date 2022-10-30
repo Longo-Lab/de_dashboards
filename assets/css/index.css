@@ -8,9 +8,11 @@ body {
 
 h1 {
   width: 660px;
+  height: 100px; 
   margin: 0px auto 0; 
   padding: 0px; 
   text-align: center;
+  vertical-align: middle;
   font-weight: 400;
   background-color: #820000;
   color: #fff;
