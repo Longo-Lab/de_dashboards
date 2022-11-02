@@ -27,3 +27,6 @@ Rscript "scripts/${name}.R"
 # Encrypt dashboards
 module purge
 find "outputs/${name}" -type f -name "*.html" -exec staticrypt {} $password -o {} -r 1 \;
+
+# cleanup
+squeue -j $SLURM_JOBID --Format=TimeUsed

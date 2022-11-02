@@ -24,7 +24,7 @@ rmarkdown::render(
     ensembl_genes = ensembl_genes,
     nameset = nameset,
     geno = 'APPL/S',
-    drug = 'BD10-2',
+    drug = 'TBS',
     filedate = '20220922',
     de_cols = c('Gene_id', 'log2FoldChange', 'padj', 'pvalue'),
     de_names = c('Log2FC', 'Pval (adj)', 'Pval'),
