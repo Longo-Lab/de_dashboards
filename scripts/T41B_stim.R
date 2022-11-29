@@ -12,7 +12,7 @@ output_dir <- file.path('.', 'outputs', nameset)  # relative to Rmd
 
 # Get Ensembl genes info
 source(file.path(lab_dir, 'de_dashboards', 'scripts', 'genes_info.R'))
-ensembl_genes <- get_genes_info(ensembl_ver = '105')
+ensembl_genes <- get_genes_info()
 
 
 # Generate results

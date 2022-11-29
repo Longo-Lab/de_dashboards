@@ -3,7 +3,7 @@ library(stringr)
 library(biomaRt)
 
 
-get_genes_info <- function(ensembl_set = 'mmusculus_gene_ensembl', ensembl_ver) {
+get_genes_info <- function(ensembl_set = 'mmusculus_gene_ensembl', ensembl_ver = '108') {
   # Fetch Ensembl genes
   ensembl <- useEnsembl('ensembl', dataset = ensembl_set, version = ensembl_ver)
   ensembl_genes <- data.table(getBM(
@@ -35,5 +35,11 @@ get_genes_info <- function(ensembl_set = 'mmusculus_gene_ensembl', ensembl_ver) 
     ensembl_genes <- merge(ensembl_genes, module, by.x = 'ensembl_gene_id', by.y = 'GENE', all.x = T)
   }
   
-  ensembl_genes
+  # Read in TF data
+  animaltfdb <- fread(file.path(ref_dir, 'TF', 'Mus_musculus_TF.txt'))[, c('Ensembl', 'Family')]
+  chembl <- fread(file.path(ref_dir, 'TF', 'chembl.csv'))[, c('ensembl_gene_id_m', 'is_mouse_chembl', 'chembl_protein_labels')]
+  
+  ensembl_genes %>% 
+    merge(animaltfdb, by.x = 'ensembl_gene_id', by.y = 'Ensembl', all.x = T) %>% 
+    merge(chembl, by.x = 'ensembl_gene_id', by.y = 'ensembl_gene_id_m', all.x = T)
 }

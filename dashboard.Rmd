@@ -130,12 +130,14 @@ results <- lapply(clusters, function(c) {
   
   # Rearrange columns
   var_names <- c('ensembl_gene_id', 'external_gene_name', 'gene_biotype', 'chromosome_name', 'category', 'direct')
+  tf_names <- c('Family', 'is_mouse_chembl', 'chembl_protein_labels')
   setcolorder(
     result, 
     c(
       var_names,
-      setdiff(names(result), c(var_names, names(modules))),
-      names(modules)
+      setdiff(names(result), c(var_names, names(modules), tf_names)),
+      names(modules),
+      tf_names
     )
   )
 })

@@ -12,12 +12,11 @@ output_dir <- file.path('.', 'outputs', nameset)  # relative to Rmd
 
 # Get Ensembl genes info
 source(file.path(lab_dir, 'de_dashboards', 'scripts', 'genes_info.R'))
-ensembl_genes <- get_genes_info(ensembl_ver = '105')
+ensembl_genes <- get_genes_info()
 
 
 # Generate results
 typeouts <- c('MG', 'ASC', 'OLG', 'OPC', 'L4_IT_CTX')
-# typeouts <- c('L4_IT_CTX')
 
 for (i in typeouts) {
   rmarkdown::render(

@@ -156,7 +156,8 @@ sketch <- htmltools::withTags(table(
       th(colspan = length(de_names), style = 'background-color:#f3f7eb;border-bottom:none;', geno),
       th(colspan = length(de_names), style = 'background-color:#fdf2f1;border-bottom:none;', str_c(geno, drug, sep = '_')),
       th(colspan = length(de_names), style = 'background-color:#eef8f9;border-bottom:none;', drug),
-      th(colspan = 5, style = 'background-color:#eeeeee;border-bottom:none;', 'Modules')
+      th(colspan = 5, style = 'background-color:#eeeeee;border-bottom:none;', 'Modules'),
+      th(colspan = 2, style = 'background-color:#f9f3d7;border-bottom:none;', 'TF')
     ),
     tr(
       lapply(rep(de_names, 3), th),
@@ -164,7 +165,9 @@ sketch <- htmltools::withTags(table(
       th('TmtAD'),
       th('Mostafavi'),
       th('Milind'),
-      th('Wan')
+      th('Wan'),
+      th('AnimalTFDB'),
+      th('ChEMBL')
     )
   )
 ))
@@ -182,18 +185,37 @@ function(row, data) {
     .html('<span class=\"tbl-info\" title=\"' + title + '\">' + info[0] + '</span>');
     
   // Module columns
-  for (var i = %s; i < %s; i++) {
+  var m = %s;
+  for (var i = m; i < m + 5; i++) {
     var modules = data[i] ? data[i].split('|')[1].split(',') : [];
 
-    $('td:eq(' + i + ')', row).
-      html('<span class=\"tbl-info\" title=\"' + modules.join('&#010;') + '\">' + modules.length + '</span>');
+    $('td:eq(' + i + ')', row)
+      .html('<span class=\"tbl-info\" title=\"' + modules.join('&#010;') + '\">' + modules.length + '</span>');
   }
+  
+  // TF columns
+  $('td:eq(' + (m + 5) + ')', row)
+    .html(data[m + 5] === null ? data[m + 5] : data[m + 5].slice(0, -3));
+    
+  var c = '';
+  if (data[m + 6] !== null) {
+    var info = data[m + 6].split('~'),
+        num = parseInt(info[0]),
+        labels = info[1].split('|'),
+        source = info[2];
+  
+    c = '<span class=\"tbl-info\" title=\"Source: ' + source + '&#010;&#010;' + labels.join('&#010;') + '\">' + num + '</span>';
+  }
+    
+  $('td:eq(' + (m + 6) + ')', row)
+    .html(c);
 
 }
-", modules_col, modules_col + 5)
+", modules_col)
 
-add_count <- function(x) {
-  str_c(str_pad(str_count(x, ',') + 1, width = 2, side = 'left', pad = '0'), x, sep = '|')
+
+add_count <- function(x, s1 = ',', s2 = '|') {
+  str_c(str_pad(str_count(x, s1) + 1, width = 2, side = 'left', pad = '0'), x, sep = s2)
 }
 
 t <- results[['{{r}}']] %>% 
@@ -206,9 +228,11 @@ t <- results[['{{r}}']] %>%
     tmtAD = add_count(tmtAD),
     mostafavi = add_count(mostafavi),
     milind = add_count(milind),
-    wan = add_count(wan)
+    wan = add_count(wan),
+    Family = str_c(Family, 'all'),
+    chembl = str_c(add_count(chembl_protein_labels, '\\|', '~'), if_else(is_mouse_chembl, 'Mouse', 'Human'), sep = '~')
   ) %>% 
-  dplyr::select(-gene_biotype, -chromosome_name) %>% 
+  dplyr::select(-gene_biotype, -chromosome_name, -is_mouse_chembl, -chembl_protein_labels) %>% 
   datatable(
     rownames = F, 
     filter = 'top',
@@ -219,7 +243,7 @@ t <- results[['{{r}}']] %>%
       dom = 'tip',
       rowCallback = JS(render_tooltip),
       columnDefs = list(
-        list(targets = modules_col:(modules_col + 4), className = 'dt-right')
+        list(targets = modules_col:(modules_col + 6), className = 'dt-right')
       )
     )
   ) %>% 
