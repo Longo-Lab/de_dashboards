@@ -1,3 +1,6 @@
+.Rhistory
+.RData
+
 .staticrypt.json
 logs/*
 commands.sh
