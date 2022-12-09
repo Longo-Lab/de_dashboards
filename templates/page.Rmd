@@ -131,6 +131,8 @@ gp_sups <- list(sup, dir_sup, comp_sup)
 gp_names <- c('', 'direct', 'compensatory')
 gp_abbrevs <- c('indir + dir', 'dir', 'comp')
 
+term_size_limit <- 2000
+
 for (i in seq(gp_names)) {
   gprofilers <- c(gprofilers, knit_expand(file = file.path(templates_dir, 'gprofiler.Rmd')))
 }
@@ -266,4 +268,4 @@ results[['{{r}}']][order(-category, -direct), .N, by = c('category', 'direct')] 
   kable_styling(bootstrap_options = c('hover', 'condensed'), full_width = F)
 ```
 
-<p style="text-align: center;">**Note**: Used ``r p_col`` column with a threshold of **`r fdr_cutoff`** to determine gene category. Used ``r lfc_col`` column (`r ifelse(lfc_col == lfc_unshrunken_col, 'unshrunken', 'shrunken')` L2FC) to rank genes for gProfiler input.</p>
+<p style="text-align: center;">**Note**: Used ``r p_col`` column with a threshold of **`r fdr_cutoff`** to determine gene category. Used absolute ``r lfc_col`` column (`r ifelse(lfc_col == lfc_unshrunken_col, 'unshrunken', 'shrunken')` L2FC) to rank genes for gProfiler input. gProfiler results only show terms with size < `r term_size_limit`.</p>

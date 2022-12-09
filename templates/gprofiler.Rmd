@@ -4,11 +4,15 @@
 e_title <- str_to_sentence(str_trim(str_c(gp_names[[{{i}}]], ' enhancement')))
 s_title <- str_to_sentence(str_trim(str_c(gp_names[[{{i}}]], ' suppression')))
 
-if (!is_empty(gp_enhs[[{{i}}]]$external_gene_name) && !is_empty(gp_sups[[{{i}}]]$external_gene_name)) {
+e_genes <- gp_enhs[[{{i}}]]$external_gene_name
+s_genes <- gp_sups[[{{i}}]]$external_gene_name
+
+
+if (!is_empty(e_genes) && !is_empty(s_genes)) {
   g <- gost(
     query = list(
-      e = gp_enhs[[{{i}}]]$external_gene_name,
-      s = gp_sups[[{{i}}]]$external_gene_name
+      e = e_genes,
+      s = s_genes
     ),
     organism = 'mmusculus',
     ordered_query = T,
@@ -18,7 +22,7 @@ if (!is_empty(gp_enhs[[{{i}}]]$external_gene_name) && !is_empty(gp_sups[[{{i}}]]
   
   if (!is.null(g)) {
     g_tbl <- g$result %>%
-      filter(term_size < 2000) %>%
+      filter(term_size < term_size_limit) %>%
       select(query, source, term_id, term_name, term_size, intersection, p_value) %>%
       pivot_wider(
         id_cols = c(source, term_id, term_name, term_size),
@@ -26,7 +30,7 @@ if (!is_empty(gp_enhs[[{{i}}]]$external_gene_name) && !is_empty(gp_sups[[{{i}}]]
         values_from = c(intersection, p_value),
         names_vary = 'slowest'
       )
-  
+    
     g$result <- g$result %>%
       mutate(
         query = recode(
@@ -34,7 +38,8 @@ if (!is_empty(gp_enhs[[{{i}}]]$external_gene_name) && !is_empty(gp_sups[[{{i}}]]
           'e' = e_title,
           's' = s_title
         )
-      )
+      ) %>% 
+      filter(term_size < term_size_limit)
   
     gostplot(g, capped = F, interactive = T)
   } else {
@@ -56,8 +61,8 @@ sketch <- htmltools::withTags(table(
       th(rowspan = 2, 'Term ID'),
       th(rowspan = 2, 'Term name'),
       th(rowspan = 2, 'Term size'),
-      th(colspan = 2, style = 'background-color:#e1e8e3;border-bottom:none;', e_title),
-      th(colspan = 2, style = 'background-color:#e8e1e1;border-bottom:none;', s_title)
+      th(colspan = 2, style = 'background-color:#e1e8e3;border-bottom:none;', str_c(e_title, ' (N=', length(e_genes), ')')),
+      th(colspan = 2, style = 'background-color:#e8e1e1;border-bottom:none;', str_c(s_title, ' (N=', length(s_genes), ')'))
     ),
     tr(
       lapply(rep(c('Intersection', 'Pval'), 2), th)
@@ -107,6 +112,7 @@ if (exists('g') && !is.null(g) && nrow(g_tbl) > 0) {
       intersection_e = add_count(intersection_e),
       intersection_s = add_count(intersection_s)
     ) %>%
+    select(source, term_id, term_name, term_size, intersection_e, p_value_e, intersection_s, p_value_s) %>% 
     datatable(
       rownames = F,
       filter = 'top',
