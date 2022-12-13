@@ -116,8 +116,8 @@ dir_sup <- results[['{{r}}']][category == 'suppression' & direct == T][order(-(a
 indir_enh <- results[['{{r}}']][category == 'enhancement' & direct == F][order(-(abs(get(lfc_geno)) + abs(get(lfc_geno_drug))))]
 indir_sup <- results[['{{r}}']][category == 'suppression' & direct == F][order(-(abs(get(lfc_geno)) + abs(get(lfc_geno_drug))))]
 
-enh <- c(dir_enh, indir_enh)
-sup <- c(dir_sup, indir_sup)
+enh <- bind_rows(dir_enh, indir_enh)
+sup <- bind_rows(dir_sup, indir_sup)
 
 comp_enh <- results[['{{r}}']][category == 'compensatory enhancement'][order(-(abs(get(lfc_geno)) + abs(get(lfc_drug))))]
 comp_sup <- results[['{{r}}']][category == 'compensatory suppression'][order(-(abs(get(lfc_geno)) + abs(get(lfc_drug))))]
