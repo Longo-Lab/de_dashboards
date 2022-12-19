@@ -18,6 +18,7 @@ Use `rmarkdown::render()` to knit the `dashboard.Rmd` template with the followin
   - If unset, `nameset` is used
 - `analyses`: Name of comparisons (default: `c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')`)
   - Provide as a vector of comparisons in the following order: geno, geno + drug (stim), drug (stim)
+  - Optionally, include a 4th comparison for drug (stim) effect in wildtype
   - Specifies how the DE results files are named (see above)
 - `de_cols`: Column names for gene ID, log fold change, p-value, followed by any additional columns of interest (default: `c('GENE', 'avg_log2FC', 'p_val_adj', 'pct.1', 'pct.2')`)
   - Log fold change will be used for ranking genes in gProfiler input and determining gene category

@@ -29,7 +29,8 @@ for (i in typeouts) {
       geno = 'PS19',
       drug = 'C31',
       filedate = '20220710',
-      typeout = i
+      typeout = i,
+      analyses = c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V', 'Wt-DvsWt-V')
     )
   )
 }

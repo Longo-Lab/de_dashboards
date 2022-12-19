@@ -147,6 +147,16 @@ Row {.tabset .tabset-fade data-height=470}
 ### Genes list
 
 ```{r {{r}}-tbl}
+analyses_cols <- list(
+  htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f3f7eb;border-bottom:none;', geno),
+  htmltools::tags$th(colspan = length(de_names), style = 'background-color:#fdf2f1;border-bottom:none;', str_c(geno, drug, sep = '_')),
+  htmltools::tags$th(colspan = length(de_names), style = 'background-color:#eef8f9;border-bottom:none;', drug)
+)
+
+if (include_wt) {
+  analyses_cols[[4]] <- htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f9f2ff;border-bottom:none;', str_c(drug, 'wt', sep = '_'))
+}
+
 sketch <- htmltools::withTags(table(
   class = 'display',
   thead(
@@ -155,14 +165,12 @@ sketch <- htmltools::withTags(table(
       th(rowspan = 2, 'Symbol'),
       th(rowspan = 2, 'Category'),
       th(rowspan = 2, 'Direct'),
-      th(colspan = length(de_names), style = 'background-color:#f3f7eb;border-bottom:none;', geno),
-      th(colspan = length(de_names), style = 'background-color:#fdf2f1;border-bottom:none;', str_c(geno, drug, sep = '_')),
-      th(colspan = length(de_names), style = 'background-color:#eef8f9;border-bottom:none;', drug),
+      analyses_cols,
       th(colspan = 5, style = 'background-color:#eeeeee;border-bottom:none;', 'Modules'),
       th(colspan = 2, style = 'background-color:#f9f3d7;border-bottom:none;', 'TF')
     ),
     tr(
-      lapply(rep(de_names, 3), th),
+      lapply(rep(de_names, length(analyses_cols)), th),
       th('TreatAD'),
       th('TmtAD'),
       th('Mostafavi'),
@@ -174,7 +182,7 @@ sketch <- htmltools::withTags(table(
   )
 ))
 
-modules_col <- 4 + 3 * length(de_names)
+modules_col <- 4 + length(analyses) * length(de_names)
 
 render_tooltip <- sprintf("
 function(row, data) {

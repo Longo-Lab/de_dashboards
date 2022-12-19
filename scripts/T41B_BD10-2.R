@@ -26,6 +26,7 @@ rmarkdown::render(
     geno = 'APPL/S',
     drug = 'BD10-2',
     filedate = '20220914',
+    analyses = c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V', 'Wt-DvsWt-V'),
     de_cols = c('GENE', 'shrunkenL2FC', 'pvalue', 'svalue', 'log2FoldChange', 'padj'),
     de_names = c('Log2FC (shrunk)', 'Pval', 'Sval', 'Log2FC', 'Pval (adj)'),
     pval_col = 'pvalue',

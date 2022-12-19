@@ -58,6 +58,8 @@ lfc_cutoff_drug <- params$lfc_cutoff_drug
 is_sc <- typeout != ''
 if (!is_sc) typeout = nameset
 
+include_wt <- ifelse(length(analyses) == 4, T, F)
+
 gene_col <- de_cols[[1]]
 lfc_col <- de_cols[[2]]
 p_col <- de_cols[[3]]
@@ -69,7 +71,13 @@ ensembl_var <- ifelse(is_sc, 'external_gene_name', 'ensembl_gene_id')
 modules <- c('TREAT-AD.Mouse.Genes.txt', 'TMT-LP.Mouse.Genes.txt', 'Mostafavi_etal.Mouse.Genes.txt', 'Milind_etal.Mouse.Genes.txt', 'AD_modules_full.tsv')
 names(modules) <- c('treatAD', 'tmtAD', 'mostafavi', 'milind', 'wan')
 
-names(analyses) <- c('geno', 'geno_drug', 'drug')
+var_names <- c('geno', 'geno_drug', 'drug')
+
+if (include_wt) {
+  var_names <- c(var_names, 'drug_wt')
+}
+
+names(analyses) <- var_names
 
 lfc_geno <- str_c(lfc_col, 'geno', sep = '.')
 lfc_drug <- str_c(lfc_col, 'drug', sep = '.')
