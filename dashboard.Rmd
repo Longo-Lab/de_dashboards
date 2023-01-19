@@ -12,7 +12,7 @@ params:
   nameset: ''
   geno: ''
   drug: ''
-  filedate: ''
+  round_num: ''
   typeout: ''
   analyses: !r c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')
   de_cols: !r c('GENE', 'avg_log2FC', 'p_val_adj', 'pct.1', 'pct.2')
@@ -44,7 +44,7 @@ ensembl_genes <- params$ensembl_genes
 nameset <- params$nameset
 geno <- params$geno
 drug <- params$drug
-filedate <- params$filedate
+round_num <- params$round_num
 typeout <- params$typeout
 analyses <- params$analyses
 de_cols <- params$de_cols
@@ -89,7 +89,7 @@ p_geno_drug <- str_c(p_col, 'geno_drug', sep = '.')
 
 # Obtain clusters
 if (is_sc) {
-  file_regex <- str_c(filedate, '\\.', nameset, '\\.(.+)\\.RNA.+\\.csv\\.gz')
+  file_regex <- str_c(round_num, '\\.', nameset, '\\.(.+)\\.RNA.+\\.csv\\.gz')
   file_matches <- list.files(file.path(base_dir, typeout), pattern = file_regex)
   clusters <- unique(str_match(file_matches, file_regex)[,2])
   clusters <- append(clusters[clusters != typeout], typeout, after = 0)  # order subclass before clusters
@@ -103,7 +103,7 @@ names(clusters) <- clusters
 genes_files <- lapply(clusters, function(c) lapply(analyses, function(a) {
   fn <- ifelse(is_sc, str_c(nameset, '.', c), nameset)
   
-  fread(file.path(base_dir, typeout, str_c(filedate, fn, 'RNA', a, 'csv.gz', sep = '.')))
+  fread(file.path(base_dir, typeout, str_c(round_num, fn, 'RNA', a, 'csv.gz', sep = '.')))
 }))
 
 # Merge data

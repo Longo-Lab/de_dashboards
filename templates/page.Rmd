@@ -14,7 +14,7 @@ Row {.tabset .tabset-fade}
 tabs <- NULL
 
 imgs <- str_c(
-  file.path(base_dir, typeout, filedate), 
+  file.path(base_dir, typeout, round_num), 
   ifelse(is_sc, str_c(nameset, '.', '{{r}}'), nameset),
   c('TREAT-AD', 'TMT-AD', 'Mostafavi_etal', 'Milind_etal', 'Wan_etal'), 
   'Modules_Up-Down.logfdr.png',
@@ -34,7 +34,7 @@ for (i in names(imgs)) {
 ```{r {{r}}-corr}
 knitr::include_graphics(
   str_c(
-    file.path(base_dir, typeout, filedate), 
+    file.path(base_dir, typeout, round_num), 
     ifelse(is_sc, str_c(nameset, '.', '{{r}}'), nameset),
     'TREAT-AD.correlations.png',
     sep = '.'

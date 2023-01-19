@@ -6,14 +6,14 @@ Use `rmarkdown::render()` to knit the `dashboard.Rmd` template with the followin
 
 - **`base_dir`**: Path to project directory
   - Must contain subfolder(s) named by `typeout` for single-cell data or `nameset` for bulk data
-  - Each subfolder must contain the respective DE results files named as: `filedate.nameset.(typeout).RNA.analyses.csv.gz`
+  - Each subfolder must contain the respective DE results files named as: `R#.nameset.(typeout).RNA.analyses.csv.gz`
 - `templates_dir`: Path to templates directory (default: [`templates`](https://github.com/Longo-Lab/de_dashboards/tree/main/templates))
 - **`ensembl_genes`**: Data table containing Ensembl genes + modules info
   - Can be obtained by calling `get_genes_info()` from [`genes_info.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/scripts/genes_info.R)
 - **`nameset`**: Name of project (e.g., `PS19_C31`)
 - **`geno`**: Name of genotype (e.g., `PS19`)
 - **`drug`**: Name of drug (e.g., `C31`)
-- **`filedate`**: Date of source file (e.g., `20220711`)
+- **`round_num`**: Round of source file (e.g., `R1`)
 - `typeout`: Cell type if single-cell data
   - If unset, `nameset` is used
 - `analyses`: Name of comparisons (default: `c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')`)
