@@ -16,7 +16,7 @@ ensembl_genes <- get_genes_info()
 
 
 # Generate results
-typeouts <- c('MG', 'ASC', 'OLG', 'OPC', 'L4_IT_CTX')
+typeouts <- c('MG', 'ASC', 'OPC', 'L4_IT_CTX')
 
 for (i in typeouts) {
   rmarkdown::render(
@@ -28,7 +28,7 @@ for (i in typeouts) {
       nameset = nameset,
       geno = 'PS19',
       drug = 'C31',
-      filedate = '20220710',
+      round_num = 'R6',
       typeout = i,
       analyses = c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V', 'Wt-DvsWt-V')
     )

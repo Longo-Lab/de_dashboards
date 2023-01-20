@@ -3,7 +3,7 @@ library(data.table)
 
 
 lab_dir <- file.path('', 'oak', 'stanford', 'scg', 'lab_flongo')
-proj_dir <- file.path(lab_dir, 'Harry', 'T41B_mapping')
+proj_dir <- file.path(lab_dir, 'T41B_BD10-2')
 dashboard_dir <- file.path(proj_dir, 'dashboard')
 
 nameset <- 'T41B_BD10-2'
@@ -25,7 +25,6 @@ rmarkdown::render(
     nameset = nameset,
     geno = 'APPL/S',
     drug = 'BD10-2',
-    filedate = '20220914',
     analyses = c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V', 'Wt-DvsWt-V'),
     de_cols = c('GENE', 'shrunkenL2FC', 'pvalue', 'svalue', 'log2FoldChange', 'padj'),
     de_names = c('Log2FC (shrunk)', 'Pval', 'Sval', 'Log2FC', 'Pval (adj)'),
