@@ -32,14 +32,18 @@ for (i in names(imgs)) {
 ### Treat-AD correlation
 
 ```{r {{r}}-corr}
-knitr::include_graphics(
-  str_c(
-    file.path(base_dir, typeout, round_num), 
-    ifelse(is_sc, str_c(nameset, '.', '{{r}}'), nameset),
-    'TREAT-AD.correlations.png',
-    sep = '.'
+tryCatch({
+  knitr::include_graphics(
+    str_c(
+      file.path(base_dir, typeout, round_num), 
+      ifelse(is_sc, str_c(nameset, '.', '{{r}}'), nameset),
+      'TREAT-AD.correlations.png',
+      sep = '.'
+    )
   )
-)
+}, error = function(e) {
+  cat('No data to show.')
+})
 ```
 
 ### L2FC correlation
@@ -57,56 +61,60 @@ both <- merge(drug_df, geno_df, by = gene_col, suffix = c('.drug', '.geno'))
 both <- merge(ensembl_genes, both, by.x = ensembl_var, by.y = gene_col)
 both <- both[(get(pval_drug) < 0.05 & get(pval_geno) < 0.05)]  # not adjusted p-val
 
-res <- cor.test(both[[lfc_unshrunken_drug]], both[[lfc_unshrunken_geno]])
-
-sub <- sprintf('R = %.3f; p < %.3g', res$estimate[[1]], res$p.value)
-gg_fig <- both %>%
-  ggplot(aes(x = get(lfc_unshrunken_drug), y = get(lfc_unshrunken_geno))) +
-  geom_point(color = NA) +
-  geom_hline(yintercept = 0, linetype = 'dashed', col = 'gray') +
-  geom_vline(xintercept = 0, linetype = 'dashed', col = 'gray') +
-  geom_ribbon(stat = 'smooth', method = 'lm', alpha = 0.5, fill = '#fee0b6') +
-  geom_smooth(method = 'lm', se = F, color = '#053061') +
-  xlab(str_c(lfc_unshrunken_col, drug, sep = '.')) +
-  ylab(str_c(lfc_unshrunken_col, geno, sep = '.')) +
-  theme_classic()
-
-both_sig <- both[(abs(get(lfc_unshrunken_drug)) > lfc_cutoff_drug | abs(get(lfc_unshrunken_geno)) > lfc_cutoff_geno)]
-
-gg_fig <- ggplotly(gg_fig, tooltip = 'none') %>%
-  add_markers(
-    x = both[[lfc_unshrunken_drug]],
-    y = both[[lfc_unshrunken_geno]],
-    color = I('#8073ac'),
-    hovertemplate = str_c(
-      '<br><b>', both$external_gene_name, '</b>',
-      '<br>', drug, ' L2FC: ', round(both[[lfc_unshrunken_drug]], 3), ' (p=', signif(both[[pval_drug]], 3), ')',
-      '<br>', geno, ' L2FC: ', round(both[[lfc_unshrunken_geno]], 3), ' (p=', signif(both[[pval_geno]], 3), ')',
-      '<extra></extra>'
+tryCatch({
+  res <- cor.test(both[[lfc_unshrunken_drug]], both[[lfc_unshrunken_geno]])
+  
+  sub <- sprintf('R = %.3f; p < %.3g', res$estimate[[1]], res$p.value)
+  gg_fig <- both %>%
+    ggplot(aes(x = get(lfc_unshrunken_drug), y = get(lfc_unshrunken_geno))) +
+    geom_point(color = NA) +
+    geom_hline(yintercept = 0, linetype = 'dashed', col = 'gray') +
+    geom_vline(xintercept = 0, linetype = 'dashed', col = 'gray') +
+    geom_ribbon(stat = 'smooth', method = 'lm', alpha = 0.5, fill = '#fee0b6') +
+    geom_smooth(method = 'lm', se = F, color = '#053061') +
+    xlab(str_c(lfc_unshrunken_col, drug, sep = '.')) +
+    ylab(str_c(lfc_unshrunken_col, geno, sep = '.')) +
+    theme_classic()
+  
+  both_sig <- both[(abs(get(lfc_unshrunken_drug)) > lfc_cutoff_drug | abs(get(lfc_unshrunken_geno)) > lfc_cutoff_geno)]
+  
+  gg_fig <- ggplotly(gg_fig, tooltip = 'none') %>%
+    add_markers(
+      x = both[[lfc_unshrunken_drug]],
+      y = both[[lfc_unshrunken_geno]],
+      color = I('#8073ac'),
+      hovertemplate = str_c(
+        '<br><b>', both$external_gene_name, '</b>',
+        '<br>', drug, ' L2FC: ', round(both[[lfc_unshrunken_drug]], 3), ' (p=', signif(both[[pval_drug]], 3), ')',
+        '<br>', geno, ' L2FC: ', round(both[[lfc_unshrunken_geno]], 3), ' (p=', signif(both[[pval_geno]], 3), ')',
+        '<extra></extra>'
+      )
     )
-  )
-
-if (nrow(both_sig) > 0) {
-  gg_fig <- gg_fig %>%
-    add_text(
-      x = both_sig[[lfc_unshrunken_drug]],
-      y = both_sig[[lfc_unshrunken_geno]],
-      text = both_sig$external_gene_name,
-      textfont = list(size = 10),
-      textposition = 'top middle'
-    ) %>% add_annotations(
-      x = 0,
-      y = 0,
-      xanchor = 'left',
-      xref = 'paper',
-      yref = 'paper',
-      text = sub,
-      showarrow = F,
-      font = list(color = 'gray', size = 15)
-    )
-}
-
-gg_fig
+  
+  if (nrow(both_sig) > 0) {
+    gg_fig <- gg_fig %>%
+      add_text(
+        x = both_sig[[lfc_unshrunken_drug]],
+        y = both_sig[[lfc_unshrunken_geno]],
+        text = both_sig$external_gene_name,
+        textfont = list(size = 10),
+        textposition = 'top middle'
+      ) %>% add_annotations(
+        x = 0,
+        y = 0,
+        xanchor = 'left',
+        xref = 'paper',
+        yref = 'paper',
+        text = sub,
+        showarrow = F,
+        font = list(color = 'gray', size = 15)
+      )
+  }
+  
+  gg_fig
+}, error = function(e) {
+  cat('No data to show.')
+})
 ```
 
 ```{r {{r}}-gprofiler, include = F}

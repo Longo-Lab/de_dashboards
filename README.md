@@ -13,7 +13,7 @@ Use `rmarkdown::render()` to knit the `dashboard.Rmd` template with the followin
 - **`nameset`**: Name of project (e.g., `PS19_C31`)
 - **`geno`**: Name of genotype (e.g., `PS19`)
 - **`drug`**: Name of drug (e.g., `C31`)
-- **`round_num`**: Round of source file (default: `R1`)
+- `round_num`: Round of source file (default: `R1`)
 - `typeout`: Cell type if single-cell data
   - If unset, `nameset` is used
 - `analyses`: Name of comparisons (default: `c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')`)

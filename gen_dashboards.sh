@@ -6,9 +6,10 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
+#SBATCH --mem=64G
 #SBATCH --partition=interactive
 #SBATCH --account=default
-#SBATCH --time=00:30:00
+#SBATCH --time=01:30:00
 
 
 # Get arguments
