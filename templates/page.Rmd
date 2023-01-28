@@ -17,7 +17,7 @@ imgs <- str_c(
   file.path(base_dir, typeout, round_num), 
   ifelse(is_sc, str_c(nameset, '.', '{{r}}'), nameset),
   c('TREAT-AD', 'TMT-AD', 'Mostafavi_etal', 'Milind_etal', 'Wan_etal'), 
-  'Modules_Up-Down.logfdr.png',
+  'Modules_Up-Down.full.logfdr.png',
   sep = '.'
 )
 names(imgs) <- c('Treat-AD', 'Tmt-AD', 'Mostafavi, et al.', 'Milind, et al.', 'Wan, et al.')
@@ -32,18 +32,14 @@ for (i in names(imgs)) {
 ### Treat-AD correlation
 
 ```{r {{r}}-corr}
-tryCatch({
-  knitr::include_graphics(
-    str_c(
-      file.path(base_dir, typeout, round_num), 
-      ifelse(is_sc, str_c(nameset, '.', '{{r}}'), nameset),
-      'TREAT-AD.correlations.png',
-      sep = '.'
-    )
+knitr::include_graphics(
+  str_c(
+    file.path(base_dir, typeout, round_num), 
+    ifelse(is_sc, str_c(nameset, '.', '{{r}}'), nameset),
+    'TREAT-AD.correlations.png',
+    sep = '.'
   )
-}, error = function(e) {
-  cat('No data to show.')
-})
+)
 ```
 
 ### L2FC correlation

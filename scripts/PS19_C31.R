@@ -16,7 +16,7 @@ ensembl_genes <- get_genes_info()
 
 
 # Generate results
-typeouts <- c("Lamp5", "Sncg", "Pvalb", "Vip", "Sst", "Sst_Chodl", "L2_IT_ENTl", 
+typeouts <- c("Lamp5", "Sncg",  "Vip", "Pvalb", "Sst", "Sst_Chodl", "L2_IT_ENTl", 
   "L2-3_IT_CTX", "L2-3_IT_ENTl", "L3_IT_ENT", "Car3", "L4-5_IT_CTX", 
   "L4_IT_CTX", "L5_IT_CTX", "L5-6_IT_TPE-ENT", "L6_IT_CTX", "L5_IT_RSP-ACA", 
   "L5-6_NP_CTX", "L6_CT_CTX", "L6b_CTX", "L6b_ENT", "CT_ENT", "L4_RSP-ACA", 
