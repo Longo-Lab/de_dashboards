@@ -43,6 +43,14 @@ a:hover {
   color: rgba(92, 92, 92, 0.6);
 }
 
+.flex-container {
+  display: flex;
+}
+
+.flex-container div {
+  flex-grow: 1;
+}
+
 .content {
   width: 600px;
   margin: 30px auto;
