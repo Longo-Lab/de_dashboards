@@ -1,0 +1,48 @@
+body {
+  font-size: 13px;
+}
+
+.sidebar-menu i {
+  margin-right: 5px;
+}
+
+td[data-type='factor'] input,
+td[data-type='character'] input {
+  width: 100px !important;
+}
+
+th {
+  white-space: nowrap;
+}
+
+.tbl-info {
+  font-weight: 600;
+}
+
+.tbl-info:hover {
+  color: gray;
+}
+
+.tab-content img {
+  height: 300px;
+  margin: 0 auto;
+  display: block;
+}
+
+.row .tab-content .tab-pane > .plotly {
+  height: 300px !important;
+}
+
+[data-value="L2FC correlation"] > .plotly {
+  max-width: 800px;
+  width: 75% !important;
+  margin: 0 auto;
+}
+
+.row .tab-content .tab-pane[data-value^="gProfiler table"] > div {
+  overflow: auto;
+}
+
+.datatables {
+  margin: 0 auto;
+}
