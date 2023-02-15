@@ -524,9 +524,20 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   
   # Update w/ cell type selection
-  clusters <- reactive(get_clusters(input$cell_type))
-  genes_files <- reactive(get_genes_files(input$cell_type, clusters()))
-  results <- reactive(get_results(clusters(), genes_files()))
+  clusters <- reactive({
+    get_clusters(input$cell_type)
+  }) %>%
+    bindCache(input$cell_type)
+  
+  genes_files <- reactive({
+    get_genes_files(input$cell_type, clusters())
+  }) %>%
+    bindCache(str_c(input$cell_type, '_genes'))
+  
+  results <- reactive({
+    get_results(clusters(), genes_files())
+  }) %>%
+    bindCache(str_c(input$cell_type, '_res'))
 
   # Render sidebar tabs
   output$page_tab <- renderUI({
@@ -551,7 +562,8 @@ server <- function(input, output, session) {
     )
     
     do.call(sidebarMenu, pages)
-  })
+  }) %>% 
+    bindCache(str_c(input$cell_type, '_tab'))
   
   # Render tabs content
   output$page_content <- renderUI({
@@ -630,7 +642,8 @@ server <- function(input, output, session) {
     )
     
     do.call(tabItems, pages)
-  })
+  }) %>% 
+    bindCache(str_c(input$cell_type, '_content'))
 }
 
 shinyApp(ui, server)
