@@ -38,8 +38,7 @@ addResourcePath(img_dir, seurat_dir)
 # Cell type selection
 cell_types <- c(
   'MG' = 'MG',
-  'ASC' = 'ASC',
-  'L4/5 IT CTX' = 'L4_IT_CTX'
+  'ASC' = 'ASC'
 )
 
 
