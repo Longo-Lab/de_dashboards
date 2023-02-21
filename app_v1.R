@@ -5,7 +5,6 @@ library(shinydashboard)
 library(DT)
 library(plotly)
 library(gprofiler2)
-library(R.utils)
 
 
 # ----------------
@@ -622,8 +621,8 @@ server <- function(input, output, session) {
                     )
                   ) %>% 
                   formatRound(grep(str_c(lfc_col, '|log2'), names(res[[cl]]), value = T), 3) %>%
-                  formatSignif(grep(str_c(p_col, '|', pval_col, '|adj|val'), names(res[[cl]]), value = T), 3)
-                  # DT::renderDataTable()
+                  formatSignif(grep(str_c(p_col, '|', pval_col, '|adj|val'), names(res[[cl]]), value = T), 3) %>% 
+                  renderDataTable()
               ),
               tabPanel(
                 'Summary table',
