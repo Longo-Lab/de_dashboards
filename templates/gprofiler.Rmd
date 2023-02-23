@@ -61,8 +61,8 @@ sketch <- htmltools::withTags(table(
       th(rowspan = 2, 'Term ID'),
       th(rowspan = 2, 'Term name'),
       th(rowspan = 2, 'Term size'),
-      th(colspan = 2, style = 'background-color:#e1e8e3;border-bottom:none;', str_c(e_title, ' (N=', length(e_genes), ')')),
-      th(colspan = 2, style = 'background-color:#e8e1e1;border-bottom:none;', str_c(s_title, ' (N=', length(s_genes), ')'))
+      th(colspan = 2, style = 'background-color:#e1e8e3;border-bottom:none;text-align:center;', str_c(e_title, ' (N=', length(e_genes), ')')),
+      th(colspan = 2, style = 'background-color:#e8e1e1;border-bottom:none;text-align:center;', str_c(s_title, ' (N=', length(s_genes), ')'))
     ),
     tr(
       lapply(rep(c('Intersection', 'Pval'), 2), th)

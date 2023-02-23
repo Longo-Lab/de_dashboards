@@ -22,7 +22,7 @@ do
 done
 
 # Generate dashboards
-ml R/4.0
+ml R/4.2.2
 Rscript "scripts/${name}.R"
 
 # Encrypt dashboards

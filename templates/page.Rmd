@@ -152,13 +152,13 @@ Row {.tabset .tabset-fade data-height=470}
 
 ```{r {{r}}-tbl}
 analyses_cols <- list(
-  htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f3f7eb;border-bottom:none;', geno),
-  htmltools::tags$th(colspan = length(de_names), style = 'background-color:#fdf2f1;border-bottom:none;', str_c(geno, drug, sep = '_')),
-  htmltools::tags$th(colspan = length(de_names), style = 'background-color:#eef8f9;border-bottom:none;', drug)
+  htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f3f7eb;border-bottom:none;text-align:center;', geno),
+  htmltools::tags$th(colspan = length(de_names), style = 'background-color:#fdf2f1;border-bottom:none;text-align:center;', str_c(geno, drug, sep = '_')),
+  htmltools::tags$th(colspan = length(de_names), style = 'background-color:#eef8f9;border-bottom:none;text-align:center;', drug)
 )
 
 if (include_wt) {
-  analyses_cols[[4]] <- htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f9f2ff;border-bottom:none;', str_c(drug, 'wt', sep = '_'))
+  analyses_cols[[4]] <- htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f9f2ff;border-bottom:none;text-align:center;', str_c(drug, 'wt', sep = '_'))
 }
 
 sketch <- htmltools::withTags(table(
@@ -170,8 +170,8 @@ sketch <- htmltools::withTags(table(
       th(rowspan = 2, 'Category'),
       th(rowspan = 2, 'Direct'),
       analyses_cols,
-      th(colspan = 5, style = 'background-color:#eeeeee;border-bottom:none;', 'Modules'),
-      th(colspan = 2, style = 'background-color:#f9f3d7;border-bottom:none;', 'TF')
+      th(colspan = 5, style = 'background-color:#eeeeee;border-bottom:none;text-align:center;', 'Modules'),
+      th(colspan = 2, style = 'background-color:#f9f3d7;border-bottom:none;text-align:center;', 'TF')
     ),
     tr(
       lapply(rep(de_names, length(analyses_cols)), th),
