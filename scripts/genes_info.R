@@ -3,6 +3,10 @@ library(stringr)
 library(biomaRt)
 
 
+# Add path to local R library
+.libPaths(c(.libPaths(), '~/R/x86_64-pc-linux-gnu-library/4.0'))
+print(.libPaths())
+
 get_genes_info <- function(ensembl_set = 'mmusculus_gene_ensembl', ensembl_ver = '108') {
   # Fetch Ensembl genes
   ensembl <- useEnsembl('ensembl', dataset = ensembl_set, version = ensembl_ver)

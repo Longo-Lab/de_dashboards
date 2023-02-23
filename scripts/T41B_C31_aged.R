@@ -9,18 +9,16 @@ dashboard_dir <- file.path(proj_dir, 'dashboard')
 nameset <- 'T41B_C31_aged'
 output_dir <- file.path('.', 'outputs', nameset)  # relative to Rmd
 
+
 # Get Ensembl genes info
 source(file.path(lab_dir, 'de_dashboards', 'scripts', 'genes_info.R'))
 ensembl_genes <- get_genes_info()
 
-# Add path to local R library
-.libPaths(c(.libPaths(), '~/R/x86_64-pc-linux-gnu-library/4.0'))
-print(.libPaths())
 
 # Generate results
-typeouts <- c('T41B_C31_aged_12m', 'T41B_C31_aged_23m')
+projs <- c('T41B_C31_aged_12m', 'T41B_C31_aged_23m')
 
-for (i in typeouts) {
+for (i in projs) {
   rmarkdown::render(
     input = 'dashboard.Rmd',
     output_file = file.path(output_dir, str_c(i, '.html')),
