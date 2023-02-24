@@ -5,10 +5,10 @@ account: longo-stanford
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 8363981
-bundleId: 6867519
+bundleId: 6872117
 url: https://longo-stanford.shinyapps.io/de_dashboards/
-when: 1676921741.90052
-lastSyncTime: 1676921741.90068
+when: 1677023645.68287
+lastSyncTime: 1677023645.68292
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: .staticrypt.json|app_v1.R|assets/css/dashboard.css|assets/css/index.css|assets/images/Gene_Drug.png|assets/images/Longo_Logo.png|commands.sh|dashboard.Rmd|gen_dashboards.sh|index.html|README.md|templates/gprofiler.Rmd|templates/page.Rmd|templates/tab.Rmd|logs|outputs|scripts

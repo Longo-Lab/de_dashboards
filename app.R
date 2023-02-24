@@ -12,7 +12,8 @@ library(R.utils)
 # Define settings
 # ----------------
 
-shinyOptions(cache = diskCache('/tmp/my-shiny-cache'))
+# shinyOptions(cache = diskCache('/tmp/my-shiny-cache'))
+shinyOptions(cache = cachem::cache_disk('./app_cache/cache/'))
 
 # lab_dir <- file.path('', 'oak', 'stanford', 'scg', 'lab_flongo')
 # proj_dir <- file.path(lab_dir, 'Tau-PS19_C31_cortex_snRNAseq')
