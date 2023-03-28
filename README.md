@@ -86,6 +86,36 @@ Alternatively, run `gen_dashboards.sh` and provide the name (`-n`) and password 
 $ sbatch gen_dashboards.sh -n PS19_C31 -p PASSPHRASE
 ```
 
+## Shiny version
+
+Dashboard files can be saved by running [`save_dashboard_files.R`](https://github.com/Longo-Lab/scripts/blob/main/save_dashboard_files.R) in the `base_dir`. It will read in a file named `config.R` located inside that directory. Then, if there is a file named `config.R` inside the project subfolder, it will read that in after, which can override any settings in the first file.
+
+Specifically, the following **bolded** options must be defined, whereas other options have default values:
+
+- **`nameset`** (needed only for single-cell data)
+- **`geno`**
+- **`drug`**
+- `round_num` (default: `R1`)
+- `analyses` (default: `c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')`)
+- `de_cols` (default: `c('GENE', 'avg_log2FC', 'p_val_adj', 'pct.1', 'pct.2')`)
+- `de_names` (default: `c('Log2FC', 'Pval (adj)', 'Pct 1', 'Pct 2')`)
+- `pval_col` (default: `p_val`)
+- `lfc_unshrunken_col` (default: `avg_log2FC`)
+- `fdr_cutoff` (default: `0.05`)
+- `lfc_cutoff_geno` (default: `0.55`)
+- `lfc_cutoff_drug` (default: `0.5`)
+- **`is_sc`** (`T` or `F` as to whether or not it is single-cell data)
+
+**Note**: The subfolder name (i.e., `typeout` for single-cell data or `nameset` for bulk data) is passed as a command line argument to `save_dashboard_files.R`. `ensembl_ver` and gProfiler `term_size_limit` are also set at the top of the script. The Ensembl genes data is saved inside `reference/biodomains/` by the `genes_info.R` script located there.
+
+In the `base_dir`, add a copy of [`app.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/app.R) and [`www/`](https://github.com/Longo-Lab/de_dashboards/tree/main/www). At the top of `app.R`, modify the dropdown selection choices accordingly and define the following:
+
+- **`nameset`** (needed only for single-cell data)
+- **`round_num`**
+- **`is_sc`**
+
+See [`deploy.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/deploy.R) for template of deploying to [shinyapps.io](https://www.shinyapps.io/).
+
 ## Use
 
 This repository is for internal use of the Longo Lab only. All work herein is under the exclusive copyright of the Longo Lab. Open source versions of the code may be made available in dedicated repositories associated with individual publications and projects at the discretion of the Longo Lab.

@@ -41,8 +41,22 @@ th {
 
 .row .tab-content .tab-pane[data-value^="gProfiler table"] > div {
   overflow: auto;
+  width: 100% !important;
 }
 
 .datatables {
   margin: 0 auto;
 }
+
+.waiter-overlay-content{
+  position: absolute;
+  top: 417px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/**** Uncomment to hide sidebar tabs for bulk data
+.sidebar-menu {
+  display: none;
+}
+*/
