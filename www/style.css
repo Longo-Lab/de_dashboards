@@ -55,6 +55,16 @@ th {
   transform: translate(-50%, -50%);
 }
 
+.main-header > .logo {
+  font-size: 16px;
+}
+
+/**** Uncomment to indent options in grouped dropdown selection menu
+.optgroup .option {
+  padding-left: 20px;
+}
+*/
+
 /**** Uncomment to hide sidebar tabs for bulk data
 .sidebar-menu {
   display: none;

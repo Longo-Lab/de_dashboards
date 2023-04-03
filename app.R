@@ -18,8 +18,7 @@ is_sc <- F
 
 # Project selection
 projs <- c(
-  'PS19 C31 stim' = 'PS19_C31_stim',
-  'PS19 C31 unstim' = 'PS19_C31_unstim'
+  'Project title' = 'project_id'
 )
 
 
@@ -172,7 +171,7 @@ ui <- dashboardPage(
   ),
   sidebar = dashboardSidebar(
     div(
-      selectizeInput('proj', label = 'Select:', choices = projs),
+      selectInput('proj', label = 'Select:', choices = projs),
     ),
     uiOutput('page_tab')
   ),

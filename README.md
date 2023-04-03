@@ -114,7 +114,7 @@ In the `base_dir`, add a copy of [`app.R`](https://github.com/Longo-Lab/de_dashb
 - **`round_num`**
 - **`is_sc`**
 
-See [`deploy.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/deploy.R) for template of deploying to [shinyapps.io](https://www.shinyapps.io/).
+See [`deploy.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/deploy.R) for template of deploying to [shinyapps.io](https://www.shinyapps.io/). Make sure to add this file to `.gitignore` if using as it contains credential information.
 
 ## Use
 
