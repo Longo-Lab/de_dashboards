@@ -3,8 +3,10 @@
 
 library(rsconnect)
 library(pkgconfig)
+library(stringr)
 
-typeouts <- c()
+typeouts <- list.files(pattern = '\\.dashboard_files\\.rdata', recursive = T) %>%
+  str_extract('[^/]+')
 
 rsconnect::setAccountInfo(
   name = 'longo-stanford', 
