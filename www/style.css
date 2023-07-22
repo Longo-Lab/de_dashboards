@@ -46,6 +46,7 @@ th {
 
 .datatables {
   margin: 0 auto;
+  height: auto !important;
 }
 
 .waiter-overlay-content{
@@ -70,3 +71,9 @@ th {
   display: none;
 }
 */
+
+.footnote {
+  text-align: center;
+  width: 75%;
+  margin: 20px auto;
+}
