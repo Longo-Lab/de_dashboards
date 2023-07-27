@@ -371,7 +371,7 @@ server <- function(input, output, session) {
                       )
                     )
                   ) %>% 
-                  formatRound(grep('log2', names(results), value = T), 3) %>%
+                  formatRound(grep('log2|L2FC', names(results), value = T), 3) %>%
                   formatSignif(grep('adj|val', names(results), value = T), 3) %>% 
                   DT::renderDataTable()
               ),
