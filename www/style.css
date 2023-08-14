@@ -33,7 +33,7 @@ th {
   height: 300px !important;
 }
 
-[data-value="L2FC correlation"] > .plotly {
+[data-value^="L2FC correlation"] > .plotly {
   max-width: 800px;
   width: 75% !important;
   margin: 0 auto;
