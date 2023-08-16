@@ -86,6 +86,23 @@ Alternatively, run `gen_dashboards.sh` and provide the name (`-n`) and password 
 $ sbatch gen_dashboards.sh -n PS19_C31 -p PASSPHRASE
 ```
 
+## Save dashboard file
+
+|| biodomain_correlation.R | biodomain_enrichment.R | save_dashboard_files.R | save_stim_dashboard_files.R |
+|---|---|---|---|---|
+| `-n`<br>`--nameset` | Name of project | Name of project | Name of project | Name of project |
+| `-g`<br>`--genotype` | Name of genotype | Name of genotype | Name of genotype | Name of genotype |
+| `-d`<br>`--drug` | Name of drug | Name of drug | Name of drug | Name of drug |
+| `-r`<br>`--round-number` | Round of source file<br><br>**default**: `R1` | Round of source file<br><br>**default**: `R1` | Round of source file<br><br>**default**: `R1` | Round of source file<br><br>**default**: `R1` |
+| `-t`<br>`--type` | Cell type if single-cell data, otherwise `bulk` for bulk data or `stim` for stimulation analysis<br><br>**default**: `bulk` | Cell type if single-cell data, otherwise `bulk` for bulk data or `stim` for stimulation analysis<br><br>**default**: `bulk` |  | -- |
+| `-a`<br>`--analyses` | Name of comparisons (_ORDER BY geno, drug, geno + drug OR stim in wtv, tgv, tgd_)<br><br>If `-t` is NOT `stim`, **default**: `Tg-VvsWt-V,Tg-DvsTg-V,Tg-DvsWt-V`<br><br>If `-t` is `stim`, **default**: `Wt-StvsWt-Un,Tg-StvsTg-Un,Tg-D-StvsTg-D-Un` | Name of comparisons (_ORDER BY geno, drug, geno + drug OR stim in wtv, tgv, tgd_)<br><br>If `-t` is NOT `stim`, **default**: `Tg-VvsWt-V,Tg-DvsTg-V,Tg-DvsWt-V`<br><br>If `-t` is `stim`, **default**: `Wt-StvsWt-Un,Tg-StvsTg-Un,Tg-D-StvsTg-D-Un` | Name of comparisons (ORDER BY geno, drug, geno + drug)<br><br>**default**: `Tg-VvsWt-V,Tg-DvsTg-V,Tg-DvsWt-V` | Name of comparisons (ORDER BY stim in wtv, tgv, tgd)<br><br>**default**: `Wt-StvsWt-Un,Tg-StvsTg-Un,Tg-D-StvsTg-D-Un` |
+| `-s`<br>`--shrunken` | -- | Flag indicating shrunken LFC is to be used | Flag indicating shrunken LFC is to be used | Flag indicating shrunken LFC is to be used |
+| `-i`<br>`--gene-col` | Column name for gene ID<br><br>**default**: `GENE` | Column name for gene ID<br><br>**default**: `GENE` | Column name for gene ID<br><br>**default**: `GENE` | Column name for gene ID<br><br>**default**: `GENE` |
+| `-c`<br>`--de-columns` | Column name for (shrunken) log fold change<br><br>If `-t` is `bulk`/`stim`, **default**: `log2FoldChange`<br><br>If `-t` is single-cell, **default**: `avg_log2FC` | Column names for log fold change and p-value column for filtering OR if `-s`, only column name for shrunken log fold change.<br><br>If `-t` is `bulk`/`stim`, **default**: `log2FoldChange`,`padj`<br><br>If `-t` is single-cell, **default**: `avg_log2FC`,`p_val_adj` |  | Column names corresponding to either `LFC,adj,pval` or `sLFC,padj,sval,LFC,pval`<br><br> |
+| `-l`<br>`--lfc-threshold` | -- | `log2(1.1)` |  |  |
+| `-p`<br>`--p-threshold` | -- | `0.05` |  |  |
+| `-`<br>`--` |  |  |  |  |
+
 ## Shiny version
 
 Dashboard files can be saved by running [`save_dashboard_files.R`](https://github.com/Longo-Lab/scripts/blob/main/save_dashboard_files.R) in the `base_dir`. It will read in a file named `config.R` located inside that directory. Then, if there is a file named `config.R` inside the project subfolder, it will read that in after, which can override any settings in the first file.
