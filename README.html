@@ -480,7 +480,7 @@ name (<code>-n</code>) and password (<code>-p</code>) arguments:</p>
 </colgroup>
 <thead>
 <tr class="header">
-<th></th>
+<th>                         </th>
 <th>biodomain_correlation.R</th>
 <th>biodomain_enrichment.R</th>
 <th>save_dashboard_files.R</th>
@@ -528,7 +528,8 @@ analysis<br><br><strong>default</strong>: <code>bulk</code></td>
 <td>Cell type if single-cell data, otherwise <code>bulk</code> for bulk
 data or <code>stim</code> for stimulation
 analysis<br><br><strong>default</strong>: <code>bulk</code></td>
-<td></td>
+<td>Cell type if single-cell data, otherwise <code>bulk</code> for bulk
+data<br><br><strong>default</strong>: <code>bulk</code></td>
 <td>–</td>
 </tr>
 <tr class="even">
@@ -554,12 +555,37 @@ tgd)<br><br><strong>default</strong>:
 </tr>
 <tr class="odd">
 <td><code>-s</code><br><code>--shrunken</code></td>
-<td>–</td>
-<td>Flag indicating shrunken LFC is to be used</td>
-<td>Flag indicating shrunken LFC is to be used</td>
-<td>Flag indicating shrunken LFC is to be used</td>
+<td>Flag indicating shrunken LFC is being
+used<br><br><strong>default</strong>:
+<code>FALSE</code><br><br><em><strong>Note</strong>: This is more for
+consistency w/ the other scripts and to use default <code>-c</code>
+value of <code>shrunkenL2FC</code>. If providing custom shrunken LFC
+column name, including <code>-s</code> or not technically does not make
+a difference.</em></td>
+<td>Flag indicating shrunken LFC is being
+used<br><br><strong>default</strong>: <code>FALSE</code></td>
+<td>Flag indicating shrunken LFC is being
+used<br><br><strong>default</strong>: <code>FALSE</code></td>
+<td>Flag indicating shrunken LFC is being
+used<br><br><strong>default</strong>: <code>FALSE</code></td>
 </tr>
 <tr class="even">
+<td><code>-u</code><br><code>--unadjusted-p</code></td>
+<td>–</td>
+<td>Flag indicating unadjusted (nominal) p-value is being used for
+filtering instead of adjusted p-value (in the case of unshrunken
+LFC)<br><br><strong>default</strong>:
+<code>FALSE</code><br><br><em><strong>Note</strong>: This is more for
+consistency w/ <strong>save_dashboard_files.R</strong> and to use
+default <code>-c</code> value for p-value filter. If providing custom
+p-value column name, including <code>-u</code> or not technically does
+not make a difference.</em></td>
+<td>Flag indicating unadjusted (nominal) p-value is being used for
+filtering instead of adjusted p-value (in the case of unshrunken
+LFC)<br><br><strong>default</strong>: <code>FALSE</code></td>
+<td>–</td>
+</tr>
+<tr class="odd">
 <td><code>-i</code><br><code>--gene-col</code></td>
 <td>Column name for gene ID<br><br><strong>default</strong>:
 <code>GENE</code></td>
@@ -570,37 +596,72 @@ tgd)<br><br><strong>default</strong>:
 <td>Column name for gene ID<br><br><strong>default</strong>:
 <code>GENE</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>-c</code><br><code>--de-columns</code></td>
-<td>Column name for log fold change<br><br>If <code>-t</code> is
+<td>Column name for log fold change (can provide shrunken or
+unshrunken)<br><br>If <code>-s</code>, <strong>default</strong>:
+<code>shrunkenL2FC</code><br><br>If <code>-t</code> is
 <code>bulk</code>/<code>stim</code>, <strong>default</strong>:
 <code>log2FoldChange</code><br><br>If <code>-t</code> is single-cell,
 <strong>default</strong>: <code>avg_log2FC</code></td>
-<td>Column name for log fold change and p-value column for
-filtering</td>
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td><code>-l</code><br><code>--lfc-threshold</code></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>If shrunken (and not stim), column name for shrunken log fold change
+OR if unshrunken (or stim), column names for log fold change and p-value
+column for filtering<br><br>If <code>-s</code> and <code>-t</code> is
+NOT stim, <strong>default</strong>: <code>shrunkenL2FC</code><br><br>If
+<code>-s</code> and <code>-t</code> is stim, <strong>default</strong>:
+<code>shrunkenL2FC,padj</code><br><br>If <code>-t</code> is
+<code>bulk</code>/<code>stim</code>, <strong>default</strong>:
+<code>log2FoldChange,padj</code> OR <code>log2FoldChange,pvalue</code>
+if <code>-u</code><br><br>If <code>-t</code> is single-cell,
+<strong>default</strong>: <code>avg_log2FC,p_val_adj</code> OR
+<code>avg_log2FC,p_val</code> if
+<code>-u</code><br><br><em><strong>Note</strong>: Must use padj &lt;
+0.05 threshold w/ either shrunken or unshrunken LFC for stim
+dashboard.</em></td>
+<td>If shrunken, column names in the order of
+<code>sLFC,sval,LFC,pval,padj</code> OR if unshrunken, column names in
+the order of <code>LFC,p1,p2,(pct1,pct2)</code>, where <code>p1</code>
+is the same p-value column used for filtering in
+<strong>biodomain_enrichment.R</strong>, <code>p2</code> is the other
+(out of p-value and p-adj columns), and
+<code>pct1</code>/<code>pct2</code> only applies for single-cell
+data<br><br>If <code>-s</code>, <strong>default</strong>:
+<code>shrunkenL2FC,svalue,log2FoldChange,pvalue,padj</code><br><br>If
+<code>-t</code> is <code>bulk</code>/<code>stim</code>,
+<strong>default</strong>: <code>log2FoldChange,padj,pvalue</code> OR
+<code>log2FoldChange,pvalue,padj</code> if <code>-u</code><br><br>If
+<code>-t</code> is single-cell, <strong>default</strong>:
+<code>avg_log2FC,p_val_adj,p_val,pct.1,pct.2</code> OR
+<code>avg_log2FC,p_val,p_val_adj,pct.1,pct.2</code> if
+<code>-u</code></td>
+<td>If shrunken, column names in the order of
+<code>sLFC,padj,sval,LFC,pval</code> OR if unshrunken, column names in
+the order of <code>LFC,adj,pval</code><br><br>If <code>-s</code>,
+<strong>default</strong>:
+<code>shrunkenL2FC,padj,svalue,log2FoldChange,pvalue</code><br><br>If
+NOT <code>-s</code>, <strong>default</strong>:
+<code>log2FoldChange,padj,pvalue</code></td>
 </tr>
 <tr class="odd">
-<td><code>-p</code><br><code>--p-threshold</code></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td><code>-l</code><br><code>--lfc-threshold</code></td>
+<td>–</td>
+<td>LFC threshold used to filter genes<br><br><strong>default</strong>:
+<code>log2(1.1)</code></td>
+<td>LFC threshold used to filter genes<br><br><strong>default</strong>:
+<code>log2(1.1)</code></td>
+<td>LFC threshold used to filter genes<br><br><strong>default</strong>:
+<code>log2(1.1)</code></td>
 </tr>
 <tr class="even">
-<td><code>-</code><br><code>--</code></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td><code>-p</code><br><code>--p-threshold</code></td>
+<td>–</td>
+<td>P-value threshold used to filter
+genes<br><br><strong>default</strong>:
+<code>0.05</code><br><br><em><strong>Note</strong>: Do not change
+default for stim dashboard.</em></td>
+<td>P-value threshold used to filter
+genes<br><br><strong>default</strong>: <code>0.05</code></td>
+<td>–</td>
 </tr>
 </tbody>
 </table>
