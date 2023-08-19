@@ -14,7 +14,6 @@ library(R.utils)
 # ----------------
 
 round_num <- 'R1'
-is_sc <- F
 
 # Project selection
 projs <- c(
@@ -36,7 +35,7 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
   # Biodomain modules
   imgs <- str_c(
     file.path(img_dir, typeout, round_num), 
-    ifelse(is_sc, str_c(nameset, '.', cluster), cluster),
+    cluster,
     c('TREAT-AD', 'TMT-AD', 'Mostafavi_etal', 'Milind_etal', 'Wan_etal'), 
     'Modules_Up-Down.full.logfdr.png',
     sep = '.'
@@ -48,7 +47,7 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
   # Biodomain correlation
   img_corr <- str_c(
     file.path(img_dir, typeout, round_num), 
-    ifelse(is_sc, str_c(nameset, '.', cluster), cluster),
+    cluster,
     'TREAT-AD.correlations.png',
     sep = '.'
   )
@@ -56,30 +55,27 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
   biodomain_correlation <- list(tabPanel('Treat-AD correlation', img(src = img_corr)))
   
   # L2FC correlation
-  l2fc_corr <- list(tabPanel('L2FC correlation', l2fc_correlations))
-  
+  l2fc_corr_wtv <- list(tabPanel('L2FC correlation (WtV)', l2fc_correlations[['WtV']]))
+  l2fc_corr_tgd <- list(tabPanel('L2FC correlation (TgD)', l2fc_correlations[['TgD']]))
   
   # gProfiler2
-  gp_names <- c('all', 'direct', 'compensatory')
-  gp_abbrevs <- c('indir + dir', 'dir', 'comp')
-  
+  gp_names <- c('LTP-dependent', 'Shared')
+
   missing_data <- div(style = 'height:300px;', 'No data to show.')
   
   gprofilers <- lapply(seq(gp_names), function(i) {
     g <- gprofilers[[gp_names[[i]]]][['g']]
     g_tbl <- gprofilers[[gp_names[[i]]]][['g_tbl']]
     
-    gp_n <- ifelse(gp_names[[i]] == 'all', '', gp_names[[i]])
+    g_title <- str_c(gp_names[[i]], ' gain')
+    l_title <- str_c(gp_names[[i]], ' loss')
     
-    e_title <- str_to_sentence(str_trim(str_c(gp_n, ' enhancement')))
-    s_title <- str_to_sentence(str_trim(str_c(gp_n, ' suppression')))
-    
-    e_length <- 0
-    s_length <- 0
+    g_length <- 0
+    l_length <- 0
     
     if (length(g) > 1) {
-      e_length <- length(g$meta$query_metadata$queries$e)
-      s_length <- length(g$meta$query_metadata$queries$s)
+      g_length <- length(g$meta$query_metadata$queries$g)
+      l_length <- length(g$meta$query_metadata$queries$l)
     }
     
     sketch <- htmltools::withTags(table(
@@ -90,8 +86,8 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
           th(rowspan = 2, 'Term ID'),
           th(rowspan = 2, 'Term name'),
           th(rowspan = 2, 'Term size'),
-          th(colspan = 2, style = 'background-color:#e1e8e3;border-bottom:none;text-align: center;', str_c(e_title, ' (N=', e_length, ')')),
-          th(colspan = 2, style = 'background-color:#e8e1e1;border-bottom:none;text-align: center;', str_c(s_title, ' (N=', s_length, ')'))
+          th(colspan = 2, style = 'background-color:#e1e8e3;border-bottom:none;text-align: center;', str_c(g_title, ' (N=', g_length, ')')),
+          th(colspan = 2, style = 'background-color:#e8e1e1;border-bottom:none;text-align: center;', str_c(l_title, ' (N=', l_length, ')'))
         ),
         tr(
           lapply(rep(c('Intersection', 'Pval'), 2), th)
@@ -147,13 +143,13 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
     }
     
     list(
-      tabPanel(str_c('gProfiler plot (', gp_abbrevs[[i]], ')'), out_plot),
-      tabPanel(str_c('gProfiler table (', gp_abbrevs[[i]], ')'), out_tbl)
+      tabPanel(str_c('gProfiler plot (', ifelse(gp_names[[i]] == 'Shared', 'shared', gp_names[[i]]), ')'), out_plot),
+      tabPanel(str_c('gProfiler table (', ifelse(gp_names[[i]] == 'Shared', 'shared', gp_names[[i]]), ')'), out_tbl)
     )
   }) %>% flatten()
   
   # tabBox object
-  m <- do.call(tabBox, c(biodomain_modules, biodomain_correlation, l2fc_corr, gprofilers))
+  m <- do.call(tabBox, c(biodomain_modules, biodomain_correlation, l2fc_corr_wtv, l2fc_corr_tgd, gprofilers))
   m$attribs$class <- 'col-sm-12'
   
   m
@@ -167,7 +163,7 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
 ui <- dashboardPage(
   skin = 'black',
   header = dashboardHeader(
-    title = 'DE dashboards'
+    title = 'T41B + BD10-2 + stim'
   ),
   sidebar = dashboardSidebar(
     div(
@@ -195,8 +191,7 @@ server <- function(input, output, session) {
   
   # Update w/ cell type selection
   page_data <- reactive({
-    fn <- ifelse(is_sc, str_c(nameset, '.', input$proj), input$proj)
-    data_file <- file.path(input$proj, str_c(round_num, fn, 'dashboard_files', 'rdata', sep = '.'))
+    data_file <- file.path(input$proj, str_c(round_num, input$proj, 'dashboard_files', 'rdata', sep = '.'))
     
     print(str_c('Loading data at ', data_file, '...'))
     load(data_file)
@@ -241,23 +236,16 @@ server <- function(input, output, session) {
     cls <- names(page_data()[['results']])
     subclass <- cls[[1]]
     
-    analyses <- page_data()[['meta']][['analyses']]
     de_names <- page_data()[['meta']][['de_names']]
     geno <- page_data()[['meta']][['geno']]
     drug <- page_data()[['meta']][['drug']]
     footnote <- page_data()[['meta']][['footnote']]
     
-    include_wt <- ifelse(length(analyses) == 4, T, F)
-    
     analyses_cols <- list(
-      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f3f7eb;border-bottom:none;text-align: center;', geno),
-      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#fdf2f1;border-bottom:none;text-align: center;', str_c(geno, drug, sep = '_')),
-      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#eef8f9;border-bottom:none;text-align: center;', drug)
+      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f3f7eb;border-bottom:none;text-align: center;', 'Wt'),
+      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#fdf2f1;border-bottom:none;text-align: center;', geno),
+      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#eef8f9;border-bottom:none;text-align: center;', str_c(geno, drug, sep = '_'))
     )
-    
-    if (include_wt) {
-      analyses_cols[[4]] <- htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f9f2ff;border-bottom:none;text-align: center;', str_c(drug, 'wt', sep = '_'))
-    }
     
     sketch <- htmltools::withTags(table(
       class = 'display',
@@ -266,7 +254,6 @@ server <- function(input, output, session) {
           th(rowspan = 2, 'Ensembl ID'),
           th(rowspan = 2, 'Symbol'),
           th(rowspan = 2, 'Category'),
-          th(rowspan = 2, 'Direct'),
           analyses_cols,
           th(colspan = 5, style = 'background-color:#eeeeee;border-bottom:none;text-align: center;', 'Modules'),
           th(colspan = 2, style = 'background-color:#f9f3d7;border-bottom:none;text-align: center;', 'TF')
@@ -284,7 +271,7 @@ server <- function(input, output, session) {
       )
     ))
     
-    modules_col <- 4 + length(analyses) * length(de_names)
+    modules_col <- 3 + length(analyses_cols) * length(de_names)
     
     render_tooltip <- sprintf("
     function(row, data) {
@@ -328,7 +315,7 @@ server <- function(input, output, session) {
         results <- page_data()[['results']][[cl]]
         l2fc_correlations <- page_data()[['l2fc_correlations']][[cl]]
         gprofilers <- page_data()[['gprofilers']][[cl]]
-        
+
         tabItem(
           tabName = str_c('page_', cl),
           class = if_else(cl == subclass, 'active', ''),
@@ -373,18 +360,18 @@ server <- function(input, output, session) {
                       search = list(regex = T)
                     )
                   ) %>% 
-                  formatRound(grep('log2|L2FC', names(results), value = T), 3) %>%
+                  formatRound(grep('log2', names(results), value = T), 3) %>%
                   formatSignif(grep('adj|val', names(results), value = T), 3) %>% 
                   DT::renderDataTable()
               ),
               tabPanel(
                 'Summary table',
-                results[order(-category, -direct), .N, by = c('category', 'direct')] %>%
+                results[order(category), .N, by = c('category')] %>%
                   datatable(
                     width = '400px',
                     selection = 'none',
                     rownames = F,
-                    colnames = c('Category', 'Direct', 'N'),
+                    colnames = c('Category', 'N'),
                     class = 'compact display',
                     options = list(
                       dom = 't'
