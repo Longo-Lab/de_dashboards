@@ -29,6 +29,10 @@ th {
   display: block;
 }
 
+.row .tab-content .tab-pane {
+  overflow: scroll;
+}
+
 .row .tab-content .tab-pane > .plotly {
   height: 300px !important;
 }

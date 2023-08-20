@@ -163,7 +163,7 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
 ui <- dashboardPage(
   skin = 'black',
   header = dashboardHeader(
-    title = 'T41B + BD10-2 + stim'
+    title = 'Stim dashboards'
   ),
   sidebar = dashboardSidebar(
     div(
