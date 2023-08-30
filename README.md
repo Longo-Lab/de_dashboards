@@ -1,6 +1,44 @@
 # DE dashboards
 
-## Options
+This provides instructions on how to generate the DE (and stimulation) dashboards using 2 methods:
+
+- [Shiny version](#shiny-version) (see [here](https://longo-lab.github.io/docs/projects))
+- [`flexdashboard` version](#flexdashboard-version) (see [here](https://longo-lab.github.io/de_dashboards/))
+
+## Shiny version
+
+Run the following [scripts](https://github.com/Longo-Lab/scripts) in the project directory to save the dashboard files:
+
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | biodomain_correlation.R | biodomain_enrichment.R | save_dashboard_files.R | save_stim_dashboard_files.R |
+|---|---|---|---|---|
+| `-n`<br>`--nameset` | Name of project | Name of project | Name of project | Name of project |
+| `-g`<br>`--genotype` | Name of genotype | Name of genotype | Name of genotype | Name of genotype |
+| `-d`<br>`--drug` | Name of drug | Name of drug | Name of drug | Name of drug |
+| `-r`<br>`--round-number` | Round of source file<br><br>**default**: `R1` | Round of source file<br><br>**default**: `R1` | Round of source file<br><br>**default**: `R1` | Round of source file<br><br>**default**: `R1` |
+| `-t`<br>`--type` | Cell type if single-cell data, otherwise `bulk` for bulk data or `stim` for stimulation analysis<br><br>**default**: `bulk` | Cell type if single-cell data, otherwise `bulk` for bulk data or `stim` for stimulation analysis<br><br>**default**: `bulk` | Cell type if single-cell data, otherwise `bulk` for bulk data<br><br>**default**: `bulk` | -- |
+| `-a`<br>`--analyses` | Name of comparisons (_ORDER BY geno, drug, geno + drug OR stim in wtv, tgv, tgd_)<br><br>If `-t` is NOT `stim`, **default**: `Tg-VvsWt-V,Tg-DvsTg-V,Tg-DvsWt-V`<br><br>If `-t` is `stim`, **default**: `Wt-StvsWt-Un,Tg-StvsTg-Un,Tg-D-StvsTg-D-Un` | Name of comparisons (_ORDER BY geno, drug, geno + drug OR stim in wtv, tgv, tgd_)<br><br>If `-t` is NOT `stim`, **default**: `Tg-VvsWt-V,Tg-DvsTg-V,Tg-DvsWt-V`<br><br>If `-t` is `stim`, **default**: `Wt-StvsWt-Un,Tg-StvsTg-Un,Tg-D-StvsTg-D-Un` | Name of comparisons (ORDER BY geno, drug, geno + drug)<br><br>**default**: `Tg-VvsWt-V,Tg-DvsTg-V,Tg-DvsWt-V` | Name of comparisons (ORDER BY stim in wtv, tgv, tgd)<br><br>**default**: `Wt-StvsWt-Un,Tg-StvsTg-Un,Tg-D-StvsTg-D-Un` |
+| `-s`<br>`--shrunken` | Flag indicating shrunken LFC is being used<br><br>**default**: `FALSE`<br><br>_**Note**: This is more for consistency w/ the other scripts and to use default `-c` value of `shrunkenL2FC`. If providing custom shrunken LFC column name, including `-s` or not technically does not make a difference._ | Flag indicating shrunken LFC is being used<br><br>**default**: `FALSE` | Flag indicating shrunken LFC is being used<br><br>**default**: `FALSE` | Flag indicating shrunken LFC is being used<br><br>**default**: `FALSE` |
+| `-u`<br>`--unadjusted-p` | -- | Flag indicating unadjusted (nominal) p-value is being used for filtering instead of adjusted p-value (in the case of unshrunken LFC)<br><br>**default**: `FALSE`<br><br>_**Note**: This is more for consistency w/ **save_dashboard_files.R** and to use default `-c` value for p-value filter. If providing custom p-value column name, including `-u` or not technically does not make a difference._ | Flag indicating unadjusted (nominal) p-value is being used for filtering instead of adjusted p-value (in the case of unshrunken LFC)<br><br>**default**: `FALSE` | -- |
+| `-i`<br>`--gene-col` | Column name for gene ID (bulk) or symbol (single-cell)<br><br>**default**: `GENE` | Column name for gene ID (bulk) or symbol (single-cell)<br><br>**default**: `GENE` | Column name for gene ID (bulk) or symbol (single-cell)<br><br>**default**: `GENE` | Column name for gene ID<br><br>**default**: `GENE` |
+| `-c`<br>`--de-columns` | Column name for log fold change (can provide shrunken or unshrunken)<br><br>If `-s`, **default**: `shrunkenL2FC`<br><br>If `-t` is `bulk`/`stim`, **default**: `log2FoldChange`<br><br>If `-t` is single-cell, **default**: `avg_log2FC` | If shrunken (and not stim), column name for shrunken log fold change OR if unshrunken (or stim), column names for log fold change and p-value column for filtering<br><br>If `-s` and `-t` is NOT stim, **default**: `shrunkenL2FC`<br><br>If `-s` and `-t` is stim, **default**: `shrunkenL2FC,padj`<br><br>If `-t` is `bulk`/`stim`, **default**: `log2FoldChange,padj` OR `log2FoldChange,pvalue` if `-u`<br><br>If `-t` is single-cell, **default**: `avg_log2FC,p_val_adj` OR `avg_log2FC,p_val` if `-u`<br><br>_**Note**: Must use padj < 0.05 threshold w/ either shrunken or unshrunken LFC for stim dashboard._ | If shrunken, column names in the order of `sLFC,sval,LFC,pval,padj` OR if unshrunken, column names in the order of `LFC,p1,p2,(pct1,pct2)`, where `p1` is the same p-value column used for filtering in **biodomain_enrichment.R**, `p2` is the other (out of p-value and p-adj columns), and `pct1`/`pct2` only applies for single-cell data<br><br>If `-s`, **default**: `shrunkenL2FC,svalue,log2FoldChange,pvalue,padj`<br><br>If `-t` is `bulk`/`stim`, **default**: `log2FoldChange,padj,pvalue` OR `log2FoldChange,pvalue,padj` if `-u`<br><br>If `-t` is single-cell, **default**: `avg_log2FC,p_val_adj,p_val,pct.1,pct.2` OR `avg_log2FC,p_val,p_val_adj,pct.1,pct.2` if `-u` | If shrunken, column names in the order of `sLFC,padj,sval,LFC,pval` OR if unshrunken, column names in the order of `LFC,adj,pval`<br><br>If `-s`, **default**: `shrunkenL2FC,padj,svalue,log2FoldChange,pvalue`<br><br>If NOT `-s`, **default**: `log2FoldChange,padj,pvalue` |
+| `-l`<br>`--lfc-threshold` | -- | LFC threshold used to filter genes<br><br>**default**: `log2(1.1)` | LFC threshold used to filter genes<br><br>**default**: `log2(1.1)` | LFC threshold used to filter genes<br><br>**default**: `log2(1.1)` |
+| `-p`<br>`--p-threshold` | -- | P-value threshold used to filter genes<br><br>**default**: `0.05`<br><br>_**Note**: Do not change default for stim dashboard._ | P-value threshold used to filter genes<br><br>**default**: `0.05` | -- |
+
+**Note**: `ensembl_ver` and gProfiler `term_size_limit` are defined at the top of the scripts. The Ensembl genes data is saved inside `reference/biodomains/` by the `genes_info.R` script located there.
+
+### Deploying to shinyapps.io
+
+In the project directory, add a copy of [`app.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/app.R) or [`app_stim.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/app_stim.R) (must be renamed to `app.R` if deploying) and [`www/`](https://github.com/Longo-Lab/de_dashboards/tree/main/www). Inside `app.R`, modify the dropdown selection choices accordingly, edit the title of the dashboard, and define the following:
+
+- **`nameset`** (needed only for single-cell data)
+- **`round_num`**
+- **`is_sc`**
+
+See [`deploy.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/deploy.R) for template of deploying to [shinyapps.io](https://www.shinyapps.io/). Make sure to add this file to `.gitignore` if using as it contains credential information.
+
+If running into error regarding package version while deploying, see [here](https://community.rstudio.com/t/problem-deploying-app-to-shinyapps-io-due-to-colorspace-1-4-2/77331) to downgrade package version.
+
+## `flexdashboard` version
 
 Use `rmarkdown::render()` to knit the `dashboard.Rmd` template with the following options:
 
@@ -37,7 +75,7 @@ Use `rmarkdown::render()` to knit the `dashboard.Rmd` template with the followin
 
 **Note**: Required options are in **bold**.
 
-## Notes
+### Troubleshooting
 
 Load R and run script to generate dashboards:
 
@@ -85,53 +123,6 @@ Alternatively, run `gen_dashboards.sh` and provide the name (`-n`) and password 
 ```
 $ sbatch gen_dashboards.sh -n PS19_C31 -p PASSPHRASE
 ```
-
-## Save dashboard file
-
-| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | biodomain_correlation.R | biodomain_enrichment.R | save_dashboard_files.R | save_stim_dashboard_files.R |
-|---|---|---|---|---|
-| `-n`<br>`--nameset` | Name of project | Name of project | Name of project | Name of project |
-| `-g`<br>`--genotype` | Name of genotype | Name of genotype | Name of genotype | Name of genotype |
-| `-d`<br>`--drug` | Name of drug | Name of drug | Name of drug | Name of drug |
-| `-r`<br>`--round-number` | Round of source file<br><br>**default**: `R1` | Round of source file<br><br>**default**: `R1` | Round of source file<br><br>**default**: `R1` | Round of source file<br><br>**default**: `R1` |
-| `-t`<br>`--type` | Cell type if single-cell data, otherwise `bulk` for bulk data or `stim` for stimulation analysis<br><br>**default**: `bulk` | Cell type if single-cell data, otherwise `bulk` for bulk data or `stim` for stimulation analysis<br><br>**default**: `bulk` | Cell type if single-cell data, otherwise `bulk` for bulk data<br><br>**default**: `bulk` | -- |
-| `-a`<br>`--analyses` | Name of comparisons (_ORDER BY geno, drug, geno + drug OR stim in wtv, tgv, tgd_)<br><br>If `-t` is NOT `stim`, **default**: `Tg-VvsWt-V,Tg-DvsTg-V,Tg-DvsWt-V`<br><br>If `-t` is `stim`, **default**: `Wt-StvsWt-Un,Tg-StvsTg-Un,Tg-D-StvsTg-D-Un` | Name of comparisons (_ORDER BY geno, drug, geno + drug OR stim in wtv, tgv, tgd_)<br><br>If `-t` is NOT `stim`, **default**: `Tg-VvsWt-V,Tg-DvsTg-V,Tg-DvsWt-V`<br><br>If `-t` is `stim`, **default**: `Wt-StvsWt-Un,Tg-StvsTg-Un,Tg-D-StvsTg-D-Un` | Name of comparisons (ORDER BY geno, drug, geno + drug)<br><br>**default**: `Tg-VvsWt-V,Tg-DvsTg-V,Tg-DvsWt-V` | Name of comparisons (ORDER BY stim in wtv, tgv, tgd)<br><br>**default**: `Wt-StvsWt-Un,Tg-StvsTg-Un,Tg-D-StvsTg-D-Un` |
-| `-s`<br>`--shrunken` | Flag indicating shrunken LFC is being used<br><br>**default**: `FALSE`<br><br>_**Note**: This is more for consistency w/ the other scripts and to use default `-c` value of `shrunkenL2FC`. If providing custom shrunken LFC column name, including `-s` or not technically does not make a difference._ | Flag indicating shrunken LFC is being used<br><br>**default**: `FALSE` | Flag indicating shrunken LFC is being used<br><br>**default**: `FALSE` | Flag indicating shrunken LFC is being used<br><br>**default**: `FALSE` |
-| `-u`<br>`--unadjusted-p` | -- | Flag indicating unadjusted (nominal) p-value is being used for filtering instead of adjusted p-value (in the case of unshrunken LFC)<br><br>**default**: `FALSE`<br><br>_**Note**: This is more for consistency w/ **save_dashboard_files.R** and to use default `-c` value for p-value filter. If providing custom p-value column name, including `-u` or not technically does not make a difference._ | Flag indicating unadjusted (nominal) p-value is being used for filtering instead of adjusted p-value (in the case of unshrunken LFC)<br><br>**default**: `FALSE` | -- |
-| `-i`<br>`--gene-col` | Column name for gene ID (bulk) or symbol (single-cell)<br><br>**default**: `GENE` | Column name for gene ID (bulk) or symbol (single-cell)<br><br>**default**: `GENE` | Column name for gene ID (bulk) or symbol (single-cell)<br><br>**default**: `GENE` | Column name for gene ID<br><br>**default**: `GENE` |
-| `-c`<br>`--de-columns` | Column name for log fold change (can provide shrunken or unshrunken)<br><br>If `-s`, **default**: `shrunkenL2FC`<br><br>If `-t` is `bulk`/`stim`, **default**: `log2FoldChange`<br><br>If `-t` is single-cell, **default**: `avg_log2FC` | If shrunken (and not stim), column name for shrunken log fold change OR if unshrunken (or stim), column names for log fold change and p-value column for filtering<br><br>If `-s` and `-t` is NOT stim, **default**: `shrunkenL2FC`<br><br>If `-s` and `-t` is stim, **default**: `shrunkenL2FC,padj`<br><br>If `-t` is `bulk`/`stim`, **default**: `log2FoldChange,padj` OR `log2FoldChange,pvalue` if `-u`<br><br>If `-t` is single-cell, **default**: `avg_log2FC,p_val_adj` OR `avg_log2FC,p_val` if `-u`<br><br>_**Note**: Must use padj < 0.05 threshold w/ either shrunken or unshrunken LFC for stim dashboard._ | If shrunken, column names in the order of `sLFC,sval,LFC,pval,padj` OR if unshrunken, column names in the order of `LFC,p1,p2,(pct1,pct2)`, where `p1` is the same p-value column used for filtering in **biodomain_enrichment.R**, `p2` is the other (out of p-value and p-adj columns), and `pct1`/`pct2` only applies for single-cell data<br><br>If `-s`, **default**: `shrunkenL2FC,svalue,log2FoldChange,pvalue,padj`<br><br>If `-t` is `bulk`/`stim`, **default**: `log2FoldChange,padj,pvalue` OR `log2FoldChange,pvalue,padj` if `-u`<br><br>If `-t` is single-cell, **default**: `avg_log2FC,p_val_adj,p_val,pct.1,pct.2` OR `avg_log2FC,p_val,p_val_adj,pct.1,pct.2` if `-u` | If shrunken, column names in the order of `sLFC,padj,sval,LFC,pval` OR if unshrunken, column names in the order of `LFC,adj,pval`<br><br>If `-s`, **default**: `shrunkenL2FC,padj,svalue,log2FoldChange,pvalue`<br><br>If NOT `-s`, **default**: `log2FoldChange,padj,pvalue` |
-| `-l`<br>`--lfc-threshold` | -- | LFC threshold used to filter genes<br><br>**default**: `log2(1.1)` | LFC threshold used to filter genes<br><br>**default**: `log2(1.1)` | LFC threshold used to filter genes<br><br>**default**: `log2(1.1)` |
-| `-p`<br>`--p-threshold` | -- | P-value threshold used to filter genes<br><br>**default**: `0.05`<br><br>_**Note**: Do not change default for stim dashboard._ | P-value threshold used to filter genes<br><br>**default**: `0.05` | -- |
-
-## Shiny version
-
-Dashboard files can be saved by running [`save_dashboard_files.R`](https://github.com/Longo-Lab/scripts/blob/main/save_dashboard_files.R) in the `base_dir`. It will read in a file named `config.R` located inside that directory. Then, if there is a file named `config.R` inside the project subfolder, it will read that in after, which can override any settings in the first file.
-
-Specifically, the following **bolded** options must be defined, whereas other options have default values:
-
-- **`nameset`** (needed only for single-cell data)
-- **`geno`**
-- **`drug`**
-- `round_num` (default: `R1`)
-- `analyses` (default: `c('Tg-VvsWt-V', 'Tg-DvsWt-V', 'Tg-DvsTg-V')`)
-- `de_cols` (default: `c('GENE', 'avg_log2FC', 'p_val_adj', 'pct.1', 'pct.2')`)
-- `de_names` (default: `c('Log2FC', 'Pval (adj)', 'Pct 1', 'Pct 2')`)
-- `pval_col` (default: `p_val`)
-- `lfc_unshrunken_col` (default: `avg_log2FC`)
-- `fdr_cutoff` (default: `0.05`)
-- `lfc_cutoff_geno` (default: `0.55`)
-- `lfc_cutoff_drug` (default: `0.5`)
-- **`is_sc`** (`T` or `F` as to whether or not it is single-cell data)
-
-**Note**: The subfolder name (i.e., `typeout` for single-cell data or `nameset` for bulk data) is passed as a command line argument to `save_dashboard_files.R`. `ensembl_ver` and gProfiler `term_size_limit` are also set at the top of the script. The Ensembl genes data is saved inside `reference/biodomains/` by the `genes_info.R` script located there.
-
-In the `base_dir`, add a copy of [`app.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/app.R) and [`www/`](https://github.com/Longo-Lab/de_dashboards/tree/main/www). At the top of `app.R`, modify the dropdown selection choices accordingly and define the following:
-
-- **`nameset`** (needed only for single-cell data)
-- **`round_num`**
-- **`is_sc`**
-
-See [`deploy.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/deploy.R) for template of deploying to [shinyapps.io](https://www.shinyapps.io/). Make sure to add this file to `.gitignore` if using as it contains credential information.
 
 ## Use
 

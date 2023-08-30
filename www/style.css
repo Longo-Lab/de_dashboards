@@ -1,9 +1,70 @@
+/* Universal */
+
 body {
   font-size: 13px;
+  overscroll-behavior-y: none;
 }
 
+/* Loading spinner */
+
+.waiter-overlay-content {
+  position: absolute;
+  top: 417px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Header */
+
+.main-header > .logo {
+  font-size: 16px;
+}
+
+/* Sidebar */
+
+.main-sidebar {
+  position: fixed;
+}
+
+/**** Uncomment to hide sidebar tabs for bulk data
+.sidebar-menu {
+  display: none;
+}
+*/
+
+/**** Uncomment to customize sidebar for single-cell data
 .sidebar-menu i {
   margin-right: 5px;
+}
+
+.optgroup .option {
+  padding-left: 20px;
+}
+*/
+
+/**** Uncomment to style sidebar text for DE dashboard
+#page_legend {
+  font-size: 11px;
+  padding: 0 15px;
+  color: lightgray;
+  position: absolute;
+  bottom: 15px;
+}
+
+#page_legend p {
+  margin: 5px 0 0;
+}
+
+#page_legend span {
+  font-weight: 700;
+  color: #f0f0f0;
+}
+*/
+
+/* Tables */
+
+th {
+  white-space: nowrap;
 }
 
 td[data-type='factor'] input,
@@ -11,8 +72,9 @@ td[data-type='character'] input {
   width: 100px !important;
 }
 
-th {
-  white-space: nowrap;
+.datatables {
+  margin: 0 auto;
+  height: auto !important;
 }
 
 .tbl-info {
@@ -23,61 +85,86 @@ th {
   color: gray;
 }
 
-.tab-content img {
-  height: 300px;
-  margin: 0 auto;
-  display: block;
+.footnote {
+  text-align: center;
+  width: 75%;
+  margin: 20px auto;
 }
+
+/* Tab content */
 
 .row .tab-content .tab-pane {
   overflow: scroll;
+}
+
+.row .tab-content .tab-pane img {
+  height: 300px;
+  margin: 0 auto;
+  display: block;
 }
 
 .row .tab-content .tab-pane > .plotly {
   height: 300px !important;
 }
 
-[data-value^="L2FC correlation"] > .plotly {
+/**** Uncomment for DE dashboard
+.row .tab-content .tab-pane[data-value="L2FC correlation"] > .plotly {
   max-width: 800px;
   width: 75% !important;
   margin: 0 auto;
 }
+*/
 
 .row .tab-content .tab-pane[data-value^="gProfiler table"] > div {
   overflow: auto;
   width: 100% !important;
 }
 
-.datatables {
-  margin: 0 auto;
-  height: auto !important;
+/**** Uncomment for stimulation dashboard
+.row .tab-content .tab-pane.active[data-value="L2FC correlation"],
+.row .tab-content .tab-pane.active[data-value="GO terms enrichment"] {
+  display: flex;
+  height: 400px;
 }
 
-.waiter-overlay-content{
-  position: absolute;
-  top: 417px;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.row .tab-content .tab-pane.active[data-value="GO terms enrichment"] img {
+  height: auto;
 }
 
-.main-header > .logo {
-  font-size: 16px;
-}
-
-/**** Uncomment to indent options in grouped dropdown selection menu
-.optgroup .option {
-  padding-left: 20px;
+.legendtitletext {
+  font-size: 12px !important;
 }
 */
 
-/**** Uncomment to hide sidebar tabs for bulk data
-.sidebar-menu {
-  display: none;
-}
-*/
+/* Modules enrichment tab */
 
-.footnote {
-  text-align: center;
-  width: 75%;
-  margin: 20px auto;
+#biodomains {
+  display: flex;
+  justify-content: center;
+}
+
+#biodomains a {
+  margin: 5px 10px 15px;
+  padding: 5px 8px;
+  background-color: #e9eef3;
+  border: 1px solid #dce7f1;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+#biodomains a:hover {
+  color: #3c8dbc;
+  background-color: #dce7f1;
+}
+
+#biodomains .active {
+  pointer-events: none;
+}
+
+#biodomains .active,
+#biodomains .active:hover {
+  color: white;
+  background-color: #3c8dbc;
+  border: 1px solid #3a82ac;
 }

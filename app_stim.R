@@ -263,9 +263,9 @@ server <- function(input, output, session) {
     footnote <- page_data()[['meta']][['footnote']]
     
     analyses_cols <- list(
-      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f3f7eb;border-bottom:none;text-align: center;', 'Wt'),
-      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#fdf2f1;border-bottom:none;text-align: center;', geno),
-      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#eef8f9;border-bottom:none;text-align: center;', str_c(geno, drug, sep = '_'))
+      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#f3f7eb;border-bottom:none;text-align: center;', title = 'Stimulation effect in WT group', 'WT'),
+      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#fdf2f1;border-bottom:none;text-align: center;', title = str_c('Stimulation effect in ', geno, ' group'), geno),
+      htmltools::tags$th(colspan = length(de_names), style = 'background-color:#eef8f9;border-bottom:none;text-align: center;', title = str_c('Stimulation effect in ', geno, '_', drug, ' group'), str_c(geno, drug, sep = '_'))
     )
     
     sketch <- htmltools::withTags(table(
@@ -312,9 +312,6 @@ server <- function(input, output, session) {
       }
       
       // TF columns
-      $('td:eq(' + (m + 5) + ')', row)
-        .html(data[m + 5] === null ? data[m + 5] : data[m + 5].slice(0, -3));
-        
       var c = '';
       if (data[m + 6] !== null) {
         var info = data[m + 6].split('~'),
@@ -358,7 +355,6 @@ server <- function(input, output, session) {
                     mostafavi = add_count(mostafavi),
                     milind = add_count(milind),
                     wan = add_count(wan),
-                    Family = str_c(Family, 'all'),
                     chembl = str_c(add_count(chembl_protein_labels, '\\|', '~'), if_else(is_mouse_chembl, 'Mouse', 'Human'), sep = '~')
                   ) %>% 
                   dplyr::select(-gene_biotype, -chromosome_name, -is_mouse_chembl, -chembl_protein_labels) %>% 
@@ -424,18 +420,25 @@ server <- function(input, output, session) {
     go_terms <- page_data()[['go_terms']][[1]]
     geno <- page_data()[['meta']][['geno']]
     drug <- page_data()[['meta']][['drug']]
+    
     go_terms <- go_terms[input$term_size_range[[1]] < term_size & term_size < input$term_size_range[[2]]]
+    
     go_terms <- go_terms[source == input$go_term]  # subset terms for specific category
+    
     top_terms <- go_terms[, head(.SD, input$top_n_terms), by = c('query', 'Tiss')][, term_name]
+    
     go_terms <- go_terms[term_name %in% top_terms] %>%
       complete(Tiss, term_name, fill = list(LogBH = 0)) %>%
       data.table()
+    
     term_order <- go_terms[go_terms[, .I[which.max(abs(LogBH))], by=term_name]$V1]
     term_down <- term_order[order(LogBH)][LogBH < 0]$term_name
     term_up <- term_order[order(-LogBH)][LogBH > 0]$term_name
     term_order <- c(term_down, term_up)
+    
     go_terms$term_name = factor(go_terms$term_name, levels=rev(term_order))
     go_terms$Tiss = factor(go_terms$Tiss, levels=rev(c('Wt', geno, str_c(geno, ' + ', drug))))
+    
     ggplot(go_terms, aes(x = LogBH, y = term_name, fill = Tiss)) +
       geom_bar(stat = 'identity', position = 'dodge') +
       guides(fill = guide_legend(reverse = T)) +
