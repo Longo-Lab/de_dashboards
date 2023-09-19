@@ -252,7 +252,9 @@ server <- function(input, output, session) {
     div(
       p(span(str_c(geno, '_VEH vs. WT_VEH')), str_c('= ', geno, ' effect')),
       p(span(str_c(geno, '_', veh, drug, ' vs. WT_VEH')), str_c('= ', geno, '_', drug, ' effect')),
-      p(span(str_c(geno, '_', veh, drug, ' vs. ', geno, '_VEH')), str_c('= ', drug, ' effect'))
+      p(span(str_c(geno, '_', veh, drug, ' vs. ', geno, '_VEH')), str_c('= ', drug, ' effect')),
+      p(span()),
+      p(span("This app constructed by: Crystal Han & Robert R Butler III"))
     )
   })
   
