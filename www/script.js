@@ -23,4 +23,14 @@ $(document).ready(function() {
       $('#biodomains ~ img').attr('src', $value);
   })
   
+  // Collapsible tabs
+  $(document).on('click', '.nav-tabs .tab-group', function(e) {
+      e.preventDefault();
+      
+      $(`.nav-tabs-custom > .nav-tabs .${$(this).text().trim().toLowerCase()}:not(.tab-group)`).animate({
+            width: 'toggle',
+            opacity: 'toggle'
+        }, 500);
+  })
+  
 });

@@ -26,13 +26,13 @@ body {
   position: fixed;
 }
 
-/**** Uncomment to hide sidebar tabs for bulk data
+/**** Uncomment for bulk data to hide sidebar tabs
 .sidebar-menu {
   display: none;
 }
 */
 
-/**** Uncomment to customize sidebar for single-cell data
+/**** Uncomment for single-cell data to format sidebar
 .sidebar-menu i {
   margin-right: 5px;
 }
@@ -42,7 +42,6 @@ body {
 }
 */
 
-/**** Uncomment to style sidebar text for DE dashboard
 #page_legend {
   font-size: 11px;
   padding: 0 15px;
@@ -59,7 +58,11 @@ body {
   font-weight: 700;
   color: #f0f0f0;
 }
-*/
+
+.footnote code {
+  color: #2569c7;
+  background-color: #f2f6f9;
+}
 
 /* Tables */
 
@@ -85,12 +88,6 @@ td[data-type='character'] input {
   color: gray;
 }
 
-.footnote {
-  text-align: center;
-  width: 75%;
-  margin: 20px auto;
-}
-
 /* Tab content */
 
 .row .tab-content .tab-pane {
@@ -107,6 +104,14 @@ td[data-type='character'] input {
   height: 300px !important;
 }
 
+.row .tab-content .tab-pane[data-value^="GSEA plot"] > .plotly {
+  height: 400px !important;
+}
+
+.row .tab-content .tab-pane[data-value^="GSEA table"] tbody tr td:first-child {
+  white-space: nowrap;
+}
+
 /**** Uncomment for DE dashboard
 .row .tab-content .tab-pane[data-value="L2FC correlation"] > .plotly {
   max-width: 800px;
@@ -114,11 +119,6 @@ td[data-type='character'] input {
   margin: 0 auto;
 }
 */
-
-.row .tab-content .tab-pane[data-value^="gProfiler table"] > div {
-  overflow: auto;
-  width: 100% !important;
-}
 
 /**** Uncomment for stimulation dashboard
 .row .tab-content .tab-pane.active[data-value="L2FC correlation"],
