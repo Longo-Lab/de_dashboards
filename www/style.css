@@ -32,7 +32,7 @@ body {
 }
 */
 
-/**** Uncomment for single-cell data to format sidebar
+/**** Uncomment for single-cell data to format sidebar options
 .sidebar-menu i {
   margin-right: 5px;
 }
@@ -101,11 +101,11 @@ td[data-type='character'] input {
 }
 
 .row .tab-content .tab-pane > .plotly {
-  height: 300px !important;
+  height: 400px !important;
 }
 
-.row .tab-content .tab-pane[data-value^="GSEA plot"] > .plotly {
-  height: 400px !important;
+.row .tab-content .tab-pane[data-value="Summary table"] > .datatables {
+  margin-bottom: 15px;
 }
 
 .row .tab-content .tab-pane[data-value^="GSEA table"] tbody tr td:first-child {

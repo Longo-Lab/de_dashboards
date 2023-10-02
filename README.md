@@ -34,9 +34,18 @@ In the project directory, add a copy of [`app.R`](https://github.com/Longo-Lab/d
 - **`round_num`**
 - **`is_sc`**
 
+In [`www/style.css`](https://github.com/Longo-Lab/de_dashboards/blob/main/www/style.css), uncomment the appropriate sections as indicated within the file:
+
+- For bulk data, uncomment rule to hide sidebar tabs
+- For single-cell data, uncomment rules to format sidebar options
+- For DE dashboards, uncomment rule for formatting L2FC correlation tab
+- For stimulation dashboards, uncomment rules for formatting L2FC correlation and GO terms enrichment tabs
+
 See [`deploy.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/deploy.R) for template of deploying to [shinyapps.io](https://www.shinyapps.io/). Make sure to add this file to `.gitignore` if using as it contains credential information.
 
 If running into error regarding package version while deploying, see [here](https://community.rstudio.com/t/problem-deploying-app-to-shinyapps-io-due-to-colorspace-1-4-2/77331) to downgrade package version.
+
+If published dashboard is having trouble loading, you may need to increase the instance size from the shinyapps.io dashboard: `Settings` > `General` > `Instance Size`
 
 ## `flexdashboard` version
 
