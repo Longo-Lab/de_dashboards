@@ -30,7 +30,7 @@ add_count <- function(x, s1 = ',', s2 = '|') {
   str_c(str_pad(str_count(x, s1) + 1, width = 2, side = 'left', pad = '0'), x, sep = s2)
 }
 
-get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
+get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers, gseas) {
   print(str_c('get_tab_box() for ', cluster, '...'))
   
   # Biodomain modules
@@ -62,14 +62,13 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
   # L2FC correlation
   l2fc_corr <- list(tabPanel('L2FC correlation', l2fc_correlations))
   
-  
   # gProfiler2
   gp_names <- c('all', 'direct', 'compensatory')
   gp_abbrevs <- c('indir + dir', 'dir', 'comp')
   
   missing_data <- div(style = 'height:300px;', 'No data to show.')
   
-  gprofilers <- lapply(seq(gp_names), function(i) {
+  gprofiler_tabs <- lapply(seq(gp_names), function(i) {
     g <- gprofilers[[gp_names[[i]]]][['g']]
     g_tbl <- gprofilers[[gp_names[[i]]]][['g_tbl']]
     
@@ -86,7 +85,7 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
       s_length <- length(g$meta$query_metadata$queries$s)
     }
     
-    sketch <- htmltools::withTags(table(
+    gprofiler_sketch <- htmltools::withTags(table(
       class = 'display',
       thead(
         tr(
@@ -130,20 +129,21 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
     if (length(g_tbl) > 1) {
       out_tbl <- g_tbl %>% 
         datatable(
+          selection = 'none',
           height = '300px',
           rownames = F,
           filter = 'top',
-          container = sketch,
+          container = gprofiler_sketch,
           class = 'compact',
           escape = F,
           options = list(
             dom = 'tip',
             scrollX = T,
             scrollY = T,
-            rowCallback = JS(render_tooltip),
+            rowCallback = htmlwidgets::JS(render_tooltip),
             columnDefs = list(
               list(targets = c(4, 6), className = 'dt-right'),
-              list(targets = c(5, 7), render = JS(render_sort))
+              list(targets = c(5, 7), render = htmlwidgets::JS(render_sort))
             )
           )
         ) %>%
@@ -156,9 +156,67 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers) {
     )
   }) %>% flatten()
   
+  # GSEA
+  gsea_sketch <- htmltools::withTags(table(
+    class = 'display',
+    thead(
+      tr(
+        th('Biodomain'),
+        th('Source'),
+        th('Term ID'),
+        th('Term name'),
+        th('Term size'),
+        th('NES')
+      )
+    )
+  ))
+  
+  gsea_tabs <- lapply(c('geno', 'drug', 'geno_drug'), function(category) {
+    
+    gsea_tbl <- gseas[[category]][['enr_tbl']] %>%
+      select(Biodomain, ONTOLOGY, ID, Description, setSize, NES) %>%
+      datatable(
+        selection = 'none',
+        height = '300px',
+        rownames = F,
+        filter = 'top',
+        container = gsea_sketch,
+        class = 'compact',
+        escape = F,
+        options = list(
+          dom = 'tip',
+          scrollX = T,
+          scrollY = T
+        )
+      ) %>%
+      formatSignif('NES', 3)
+    
+    list(
+      tabPanel(str_c('GSEA plot (', category, ')'), gseas[[category]][['enr_plt']]),
+      tabPanel(str_c('GSEA table (', category, ')'), gsea_tbl)
+    )
+  }) %>% flatten()
+  
   # tabBox object
-  m <- do.call(tabBox, c(biodomain_modules, biodomain_correlation, l2fc_corr, gprofilers))
+  m <- do.call(tabBox, c(biodomain_modules, biodomain_correlation, l2fc_corr, list(tabPanel('gProfiler', '')), gprofiler_tabs, list(tabPanel('GSEA', '')), gsea_tabs))
   m$attribs$class <- 'col-sm-12'
+  
+  # remove default click event on grouping tabs
+  for (idx in c(4, 11)) {
+    m$children[[1]]$children[[1]]$children[[idx]]$children[[1]]$attribs$`data-toggle` = ''
+    m$children[[1]]$children[[1]]$children[[idx]]$children[[1]]$attribs$`data-bs-toggle` = ''
+  }
+  
+  # add class to collapsing tabs for easier selection
+  for (idx in 4:17) {
+    cl <- (m$children[[1]]$children[[1]]$children[[idx]]$children[[1]]$children[[2]] %>% str_split(' '))[[1]][[1]] %>% str_to_lower()
+    
+    if (idx %in% c(4, 11)) {
+      cl <- c(cl, 'tab-group')
+    }
+    
+    m$children[[1]]$children[[1]]$children[[idx]]$attribs$class = cl
+  }
   
   m
 }
@@ -211,6 +269,7 @@ server <- function(input, output, session) {
       'results' = results,
       'l2fc_correlations' = l2fc_correlations, 
       'gprofilers' = gprofilers,
+      'gseas' = gseas,
       'meta' = meta
     )
   })
@@ -246,25 +305,25 @@ server <- function(input, output, session) {
   output$page_legend <- renderUI({
     geno <- page_data()[['meta']][['geno']]
     drug <- page_data()[['meta']][['drug']]
+    footnote <- page_data()[['meta']][['footnote']]
     
     veh <- ifelse(drug == 'TBS', 'VEH_', '')
     
     div(
       p(str_c(geno, '_VEH vs. WT_VEH'), br(), icon('arrow-right'),
               span(str_c(' ', geno, ' effect'))),
-      br(style="line-height: 5px"),
       p(str_c(geno, '_', veh, drug, ' vs. WT_VEH'), br(), icon('arrow-right'),
               span(str_c(' ', geno, '_', drug, ' effect'))),
-      br(style="line-height: 5px"),
-      p(str_c(geno, '_', veh, drug, ' vs. ', geno, '_VEH'), br(), 
-              icon('arrow-right'), span(str_c(' ', drug, ' effect'))),
-      br(style="line-height: 5px"),
+      p(str_c(geno, '_', veh, drug, ' vs. ', geno, '_VEH'), br(), icon('arrow-right'),
+              span(str_c(' ', drug, ' effect'))),
       # Wt drug effect group, uncomment if present
-      p(str_c('WT_', veh, drug, ' vs. WT_VEH'), br(), icon('arrow-right'),
-              span(str_c(' ', drug, ' effect (in WT)'))),
-      br(), br(), br(),
-      p(paste("Copyright \U00A9 Longo Lab", format(Sys.Date(), "%Y"))),
-      p("This app made by: ", br(), "Crystal Han & Robert R Butler III")
+      # p(str_c('WT_', veh, drug, ' vs. WT_VEH'), br(), icon('arrow-right'),
+      #         span(str_c(' ', drug, ' effect (in WT)'))),
+      br(),
+      footnote,
+      br(),
+      p(paste('Copyright \U00A9 Longo Lab', format(Sys.Date(), '%Y')))
+      # p('This app made by: ', br(), 'Crystal Han & Robert R Butler III')
     )
   })
   
@@ -277,8 +336,7 @@ server <- function(input, output, session) {
     de_names <- page_data()[['meta']][['de_names']]
     geno <- page_data()[['meta']][['geno']]
     drug <- page_data()[['meta']][['drug']]
-    footnote <- page_data()[['meta']][['footnote']]
-    
+
     veh <- ifelse(drug == 'TBS', 'VEH_', '')
     
     include_wt <- ifelse(length(analyses) == 4, T, F)
@@ -359,12 +417,13 @@ server <- function(input, output, session) {
         results <- page_data()[['results']][[cl]]
         l2fc_correlations <- page_data()[['l2fc_correlations']][[cl]]
         gprofilers <- page_data()[['gprofilers']][[cl]]
+        gseas <- page_data()[['gseas']][[cl]]
         
         tabItem(
           tabName = str_c('page_', cl),
           class = if_else(cl == subclass, 'active', ''),
           fluidRow(
-            get_tab_box(subclass, cl, l2fc_correlations, gprofilers)
+            get_tab_box(subclass, cl, l2fc_correlations, gprofilers, gseas)
           ),
           fluidRow(
             tabBox(
@@ -391,12 +450,12 @@ server <- function(input, output, session) {
                     container = sketch,
                     class = 'compact',
                     escape = F,
-                    callback = JS("$(\"[data-type='number'] input[type='search']\").attr('placeholder','');"),
+                    callback = htmlwidgets::JS("$(\"[data-type='number'] input[type='search']\").attr('placeholder','');"),
                     options = list(
                       dom = 'tip',
                       scrollX = T,
                       scrollY = T,
-                      rowCallback = JS(render_tooltip),
+                      rowCallback = htmlwidgets::JS(render_tooltip),
                       columnDefs = list(
                         list(targets = modules_col:(modules_col + 6), className = 'dt-right')
                       ),
@@ -419,8 +478,7 @@ server <- function(input, output, session) {
                     options = list(
                       dom = 't'
                     )
-                  ),
-                footnote
+                  )
               )
             )
           )
