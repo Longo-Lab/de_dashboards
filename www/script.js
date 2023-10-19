@@ -11,7 +11,7 @@ $(document).ready(function() {
   })
   
   // Buttons for modules enrichment tab
-  $(document).on('click', '#biodomains a', function() {
+  $(document).on('click', '.modules a', function() {
       var $this = $(this),
           $value = $this.data('value');
 
@@ -20,13 +20,13 @@ $(document).ready(function() {
       $this.parent().find('a').removeClass('active');
       $this.addClass('active');
       
-      $('#biodomains ~ img').attr('src', $value);
+      $this.parent().next('img').attr('src', $value);
   })
   
   // Collapsible tabs
   $(document).on('click', '.nav-tabs .tab-group', function(e) {
       e.preventDefault();
-      
+    
       $(`.nav-tabs-custom > .nav-tabs .${$(this).text().trim().toLowerCase()}:not(.tab-group)`).animate({
             width: 'toggle',
             opacity: 'toggle'

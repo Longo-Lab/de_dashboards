@@ -20,6 +20,26 @@ body {
   font-size: 16px;
 }
 
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  height: 50px;
+}
+
+.navbar-nav .dropdown {
+  margin-top: 5px;
+  margin-right: 7px;
+  font-size: 10px;
+  line-height: 10px;
+  text-align: right;
+}
+
+.navbar-nav .dropdown a {
+  display: inline;
+  padding: inherit;
+  border: none;
+}
+
 /* Sidebar */
 
 .main-sidebar {
@@ -136,14 +156,61 @@ td[data-type='character'] input {
 }
 */
 
+/* Collapsible tabs */
+
+.nav-tabs-custom > .nav-tabs > li {
+  border-bottom: 1px solid transparent;
+  margin-bottom: 1px;
+}
+
+.nav-tabs-custom > .nav-tabs .gprofiler,
+.nav-tabs-custom > .nav-tabs .gsea {
+  margin-right: 0;
+  white-space: nowrap;
+}
+
+.nav-tabs-custom > .nav-tabs .gsea.tab-group {
+  margin-left: 5px;
+}
+
+.nav-tabs-custom > .nav-tabs .tab-group a,
+.nav-tabs-custom > .nav-tabs .tab-group a:hover {
+  color: white;
+}
+
+.nav-tabs-custom > .nav-tabs .gprofiler:not(.tab-group),
+.nav-tabs-custom > .nav-tabs .gsea:not(.tab-group) {
+  display: none;
+}
+
+.nav-tabs-custom > .nav-tabs .gprofiler.tab-group {
+  background-color: #6ba4c6;
+}
+
+.nav-tabs-custom > .nav-tabs .gsea.tab-group {
+  background-color: #95adbc;
+}
+
+.nav-tabs-custom > .nav-tabs .tab-group:hover {
+  opacity: 0.8;
+}
+
+.nav-tabs-custom > .nav-tabs .gprofiler {
+  border-bottom: 1px solid #6ba4c6 !important;
+}
+
+.nav-tabs-custom > .nav-tabs .gsea {
+  border-bottom: 1px solid #95adbc !important;
+}
+
 /* Modules enrichment tab */
 
-#biodomains {
+.modules {
   display: flex;
   justify-content: center;
 }
 
-#biodomains a {
+.modules a {
   margin: 5px 10px 15px;
   padding: 5px 8px;
   background-color: #e9eef3;
@@ -153,17 +220,17 @@ td[data-type='character'] input {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
-#biodomains a:hover {
+.modules a:hover {
   color: #3c8dbc;
   background-color: #dce7f1;
 }
 
-#biodomains .active {
+.modules .active {
   pointer-events: none;
 }
 
-#biodomains .active,
-#biodomains .active:hover {
+.modules .active,
+.modules .active:hover {
   color: white;
   background-color: #3c8dbc;
   border: 1px solid #3a82ac;
