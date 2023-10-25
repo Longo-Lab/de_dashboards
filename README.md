@@ -28,11 +28,17 @@ Run the following [scripts](https://github.com/Longo-Lab/scripts) in the project
 
 ### Deploying to shinyapps.io
 
-In the project directory, add a copy of [`app.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/app.R) or [`app_stim.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/app_stim.R) (must be renamed to `app.R` if deploying) and [`www/`](https://github.com/Longo-Lab/de_dashboards/tree/main/www). Inside `app.R`, modify the dropdown selection choices accordingly, edit the title of the dashboard, and define the following:
+In the project directory, add a copy of [`app.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/app.R) or [`app_stim.R`](https://github.com/Longo-Lab/de_dashboards/blob/main/app_stim.R) (must be renamed to `app.R` if deploying) and [`www/`](https://github.com/Longo-Lab/de_dashboards/tree/main/www). 
 
-- **`nameset`** (needed only for single-cell data)
+Inside `app.R`, define the following variables at the top of the file:
+
+- **`nameset`** (for single-cell data only)
 - **`round_num`**
-- **`is_sc`**
+- **`is_sc`** (for DE dashboard only)
+
+Also, make the following changes as needed:
+
+- modify the dropdown selection choices accordingly, edit the title of the dashboard
 
 In [`www/style.css`](https://github.com/Longo-Lab/de_dashboards/blob/main/www/style.css), uncomment the appropriate sections as indicated within the file:
 
