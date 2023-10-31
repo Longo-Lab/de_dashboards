@@ -37,27 +37,27 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers, gseas) 
   imgs <- str_c(
     file.path(img_dir, typeout, round_num), 
     ifelse(is_sc, str_c(nameset, '.', cluster), cluster),
-    c('TREAT-AD', 'Mostafavi_etal', 'Milind_etal', 'Wan_etal'), 
+    c('Mostafavi_etal', 'Milind_etal', 'Wan_etal'), 
     'Modules_Up-Down.full.logfdr.png',
     sep = '.'
   )
-  names(imgs) <- c('Treat-AD', 'Mostafavi, et al.', 'Milind, et al.', 'Wan, et al.')
+  names(imgs) <- c('Mostafavi, et al.', 'Milind, et al.', 'Wan, et al.')
   
   transcriptomics_modules <- list(tabPanel(
     'Transcriptomics enrichment', 
-    do.call(div, c(lapply(names(imgs), function(i) { a(`data-value` = imgs[[i]], class = ifelse(i == 'Treat-AD', 'active', ''), i) }), class = 'modules')),
-    img(src = imgs[['Treat-AD']])
+    do.call(div, c(lapply(names(imgs), function(i) { a(`data-value` = imgs[[i]], class = ifelse(i == 'Mostafavi, et al.', 'active', ''), i) }), class = 'modules')),
+    img(src = imgs[['Mostafavi, et al.']])
   ))
   
   # Proteomics modules
   imgs <- str_c(
     file.path(img_dir, typeout, round_num), 
     ifelse(is_sc, str_c(nameset, '.', cluster), cluster),
-    c('TMT-AD', 'BA6', 'BA37'), 
+    c('TMT-AD', 'BA6'), 
     'Modules_Up-Down.full.logfdr.png',
     sep = '.'
   )
-  names(imgs) <- c('Tmt-AD', 'BA6 resilience', 'BA37 resilience')
+  names(imgs) <- c('Tmt-AD', 'BA6/BA37 resilience')
   
   proteomics_modules <- list(tabPanel(
     'Proteomics enrichment', 
@@ -144,6 +144,9 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers, gseas) 
     out_tbl <- missing_data
     if (length(g_tbl) > 1) {
       out_tbl <- g_tbl %>% 
+        mutate(
+          term_id = if_else(str_detect(term_id, '^GO:'), str_c('<a href="https://www.ebi.ac.uk/QuickGO/term/', term_id, '">', term_id, '</a>'), term_id)
+        ) %>% 
         datatable(
           selection = 'none',
           height = '300px',
@@ -194,6 +197,9 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers, gseas) 
     
     gsea_tbl <- gseas[[category]][['enr_tbl']] %>%
       dplyr::select(Biodomain, ONTOLOGY, ID, Description, setSize, p.adjust, NES) %>%
+      mutate(
+        ID = str_c('<a href="https://www.ebi.ac.uk/QuickGO/term/', ID, '">', ID, '</a>')
+      ) %>% 
       datatable(
         selection = 'none',
         height = '300px',
@@ -218,8 +224,15 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers, gseas) 
   
   gsea_tabs <- c(gsea_tabs[c(1, 3, 5)], gsea_tabs[c(2, 4, 6)])
   
+  # GSEA correlation
+  gsea_correlation <- list(tabPanel('GSEA correlation', gseas$corr))
+  
   # tabBox object
-  m <- do.call(tabBox, c(transcriptomics_modules, proteomics_modules, biodomain_correlation, l2fc_corr, list(tabPanel('gProfiler', '')), gprofiler_tabs, list(tabPanel('GSEA', '')), gsea_tabs))
+  m <- do.call(tabBox, c(
+    transcriptomics_modules, proteomics_modules, biodomain_correlation, l2fc_corr, 
+    list(tabPanel('gProfiler', '')), gprofiler_tabs, 
+    list(tabPanel('GSEA', '')), gsea_correlation, gsea_tabs)
+  )
   m$attribs$class <- 'col-sm-12'
   
   # remove default click event on grouping tabs
@@ -229,7 +242,7 @@ get_tab_box <- function(typeout, cluster, l2fc_correlations, gprofilers, gseas) 
   }
   
   # add class to collapsing tabs for easier selection
-  for (idx in 5:18) {
+  for (idx in 5:19) {
     cl <- (m$children[[1]]$children[[1]]$children[[idx]]$children[[1]]$children[[2]] %>% str_split(' '))[[1]][[1]] %>% str_to_lower()
     
     if (idx %in% c(5, 12)) {
@@ -381,16 +394,17 @@ server <- function(input, output, session) {
           th(rowspan = 2, 'Category'),
           th(rowspan = 2, 'Direct'),
           analyses_cols,
-          th(colspan = 5, style = 'background-color:#eeeeee;border-bottom:none;text-align: center;', 'Modules'),
+          th(colspan = 6, style = 'background-color:#eeeeee;border-bottom:none;text-align: center;', 'Modules'),
           th(colspan = 2, style = 'background-color:#f9f3d7;border-bottom:none;text-align: center;', 'TF')
         ),
         tr(
           lapply(rep(de_names, length(analyses_cols)), th),
           th('TreatAD'),
-          th('TmtAD'),
           th('Mostafavi'),
           th('Milind'),
           th('Wan'),
+          th('TmtAD'),
+          th('Resilience'),
           th('AnimalTFDB'),
           th('ChEMBL')
         )
@@ -410,7 +424,7 @@ server <- function(input, output, session) {
         
       // Module columns
       var m = %s;
-      for (var i = m; i < m + 5; i++) {
+      for (var i = m; i < m + 6; i++) {
         var modules = data[i] ? data[i].split('|')[1].split(',') : [];
         $('td:eq(' + i + ')', row)
           .html('<span class=\"tbl-info\" title=\"' + modules.join('&#010;') + '\">' + modules.length + '</span>');
@@ -418,8 +432,8 @@ server <- function(input, output, session) {
       
       // TF columns
       var c = '';
-      if (data[m + 6] !== null) {
-        var info = data[m + 6].split('~'),
+      if (data[m + 7] !== null) {
+        var info = data[m + 7].split('~'),
             num = parseInt(info[0]),
             labels = info[1].split('|'),
             source = info[2];
@@ -427,7 +441,7 @@ server <- function(input, output, session) {
         c = '<span class=\"tbl-info\" title=\"Source: ' + source + '&#010;&#010;' + labels.join('&#010;') + '\">' + num + '</span>';
       }
         
-      $('td:eq(' + (m + 6) + ')', row)
+      $('td:eq(' + (m + 7) + ')', row)
         .html(c);
     }
     ", modules_col)
@@ -451,16 +465,18 @@ server <- function(input, output, session) {
               width = 12,
               tabPanel(
                 'Genes list',
+                class = 'genes-list',
                 results %>% 
                   mutate(
                     ensembl_gene_id = str_c('<a href="https://www.ncbi.nlm.nih.gov/gene/?term=', ensembl_gene_id, '">', ensembl_gene_id, '</a>'),
                     external_gene_name = str_c(external_gene_name, gene_biotype, chromosome_name, sep = '|'),
                     category = factor(category),
                     treatAD = add_count(treatAD),
-                    tmtAD = add_count(tmtAD),
                     mostafavi = add_count(mostafavi),
                     milind = add_count(milind),
                     wan = add_count(wan),
+                    tmtAD = add_count(tmtAD),
+                    resilience = add_count(resilience),
                     chembl = str_c(add_count(chembl_protein_labels, '\\|', '~'), if_else(is_mouse_chembl, 'Mouse', 'Human'), sep = '~')
                   ) %>% 
                   dplyr::select(-gene_biotype, -chromosome_name, -is_mouse_chembl, -chembl_protein_labels) %>% 
@@ -478,7 +494,7 @@ server <- function(input, output, session) {
                       scrollY = T,
                       rowCallback = htmlwidgets::JS(render_tooltip),
                       columnDefs = list(
-                        list(targets = modules_col:(modules_col + 6), className = 'dt-right')
+                        list(targets = modules_col:(modules_col + 7), className = 'dt-right')
                       ),
                       search = list(regex = T)
                     )

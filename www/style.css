@@ -90,8 +90,8 @@ th {
   white-space: nowrap;
 }
 
-td[data-type='factor'] input,
-td[data-type='character'] input {
+.genes-list td[data-type='factor'] input,
+.genes-list td[data-type='character'] input {
   width: 100px !important;
 }
 
@@ -102,6 +102,7 @@ td[data-type='character'] input {
 
 .tbl-info {
   font-weight: 600;
+  cursor: default;
 }
 
 .tbl-info:hover {

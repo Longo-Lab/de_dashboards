@@ -36,9 +36,11 @@ Inside `app.R`, define the following variables at the top of the file:
 - **`round_num`**
 - **`is_sc`** (for DE dashboard only)
 
-Also, make the following changes as needed:
+Also, modify the following sections accordingly:
 
-- modify the dropdown selection choices accordingly, edit the title of the dashboard
+- Project dropdown selection choices defined in `projs` near the top of the file
+- Dashboard title and authors inside `dashboardHeader()`
+- Uncomment "Wt drug effect" sidebar text if applicable inside `output$page_legend`
 
 In [`www/style.css`](https://github.com/Longo-Lab/de_dashboards/blob/main/www/style.css), uncomment the appropriate sections as indicated within the file:
 
